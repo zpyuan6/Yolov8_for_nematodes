@@ -12,19 +12,19 @@ def prediction_test():
     results = model("bus.jpg")  # predict on an image
     # success = model.export(format="onnx")  # export the model to ONNX format
 
-    res_plotted = results[0].plot()
+    # res_plotted = results[0].plot()
 
-    print("Results class", results[0].probs)
+    # print("Results class", results[0].probs)
     #  format x1,y1,x2,y2,conf,cls
     print("Bounding box", results[0].boxes)
     print("Bounding box", results[0].boxes.xyxy)
 
-    print(results[0].masks)
-    print(results[0].probs)
+    # print(results[0].masks)
+    # print(results[0].probs)
 
-    print(type(res_plotted))
-    cv2.imshow("result", res_plotted)
-    cv2.waitKey()
+    # print(type(res_plotted))
+    # cv2.imshow("result", res_plotted)
+    # cv2.waitKey()
     # print(results[0].boxes)
 
 def prediction(model_path,image_path):
@@ -56,4 +56,5 @@ def prediction(model_path,image_path):
 
 # Yolov8 DOCS https://docs.ultralytics.com/modes/predict/
 if __name__ == "__main__":
-    prediction("runs\\detect\\train\\weights\\last.pt", "F:\\nematoda\\nemadote_detection\\images\\train\\img_038_id0.jpg")
+    prediction_test()
+    # prediction("runs\\detect\\train\\weights\\last.pt", "F:\\nematoda\\nemadote_detection\\images\\train\\img_038_id0.jpg")

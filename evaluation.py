@@ -57,9 +57,19 @@ def evaluation_by_sourcecode(model_path):
 
     metrics = model.val("nematodes.yaml")
 
-    print(metrics)
+    # model.val( save_json=True, save_dir="val")
+
+    print(metrics.box.speed)
 
     print(metrics.box.map)
+
+    print(metrics.box.p)
+
+    print(metrics.box.r)
+
+    print(metrics.box.f1)
+
+    print(metrics.box.ap50())
 
 if __name__ == "__main__":
     model_path = "runs\\detect\\train\\weights\\best.pt"
