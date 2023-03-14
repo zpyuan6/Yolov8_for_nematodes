@@ -57,7 +57,7 @@ def evaluation_by_sourcecode(model_path):
 
     metrics = model.val("nematodes.yaml")
 
-    # model.val( save_json=True, save_dir="val")
+    # model.val("nematodes.yaml", save_json=True, save_dir="val")
 
     print(metrics.box.speed)
 
