@@ -34,7 +34,7 @@ def prediction(model_path,image_path):
     # Use the model
     # model.train(data="coco128.yaml", epochs=3)  # train the model
     # metrics = model.val()  # evaluate model performance on the validation set
-    results = model(image_path)  # predict on an image
+    results = model(image_path, conf=0.226)  # predict on an image
 
     # print("Results class", results[0].probs)
     # #  format x1,y1,x2,y2,conf,cls
@@ -56,5 +56,5 @@ def prediction(model_path,image_path):
 
 # Yolov8 DOCS https://docs.ultralytics.com/modes/predict/
 if __name__ == "__main__":
-    prediction_test()
-    # prediction("runs\\detect\\train\\weights\\last.pt", "F:\\nematoda\\nemadote_detection\\images\\train\\img_038_id0.jpg")
+    # prediction_test()
+    prediction("runs\\detect\\train\\weights\\best.pt", "F:\\nematoda\\nemadote_detection\\images\\train\\img_038_id1.jpg")
