@@ -4,6 +4,7 @@ import os
 import tqdm
 import time
 import seaborn
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 def prediction(model_path, dataset_dir):
     test_image_dir = f"{dataset_dir}\\images\\test"
@@ -55,11 +56,11 @@ def prediction_speed(model_path, dataset_dir):
 def evaluation_by_sourcecode(model_path):
     model = YOLO(model_path)
 
-    metrics = model.val("nematodes.yaml")
+    metrics = model.val("nematodes_test.yaml",save_json=True)
 
     # model.val("nematodes.yaml", save_json=True, save_dir="val")
 
-    print(metrics.box.speed)
+    # print(metrics.box.speed)
 
     print(metrics.box.map)
 
@@ -69,10 +70,11 @@ def evaluation_by_sourcecode(model_path):
 
     print(metrics.box.f1)
 
-    print(metrics.box.ap50())
+    print(metrics.box.ap50)
 
 if __name__ == "__main__":
-    model_path = "runs\\detect\\train\\weights\\best.pt"
+    # model_path = "runs\\detect\\train\\weights\\best.pt"
+    model_path = "runs\\detect\\train\\weights\\last.pt"
     dataset_dir = "F:\\nematoda\\nemadote_detection"
 
     evaluation_by_sourcecode(model_path)
