@@ -73,7 +73,7 @@ def evaluation_by_sourcecode(model_path):
     print(metrics.box.ap50)
 
 if __name__ == "__main__":
-    model_path = "runs\\detect\\train\\weights\\best.pt"
+    model_path = "runs\\detect\\train3\\weights\\best.pt"
     # model_path = "runs\\detect\\train\\weights\\last.pt"
     dataset_dir = "F:\\nematoda\\nemadote_detection"
 

@@ -2,3 +2,6 @@ runs/*
 val/*
 
 *.pt
+
+*.jpg
+*.png

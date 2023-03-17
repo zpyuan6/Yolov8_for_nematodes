@@ -151,13 +151,14 @@ def check_txt_annotation(image_path, txt_annotation):
             img = cv2.rectangle(img, (x1,y1), (x2,y2), (0,255,0), 2)
     
     cv2.imshow("result",img)
-    cv2.waitKey(0)
+    # cv2.waitKey(0)
+    cv2.imwrite("annotation.jpg",img)
 
 if __name__ == "__main__":
     # generate_bounding_box_json()
 
     # generate_annotation_txt()
 
-    check_txt_annotation("F:\\nematoda\\nemadote_detection\\images\\test\\img_038_id16.jpg","F:\\nematoda\\nemadote_detection\\labels\\test\\img_038_id16.txt")
+    check_txt_annotation("F:\\nematoda\\nemadote_detection\\images\\test\\img_038_id2.jpg","F:\\nematoda\\nemadote_detection\\labels\\test\\img_038_id2.txt")
 
     # clean_and_refactor()

@@ -50,11 +50,12 @@ def prediction(model_path,image_path):
         img = cv2.rectangle(img, (int(bounding_box[0]),int(bounding_box[1])), (int(bounding_box[2]),int(bounding_box[3])),(0,255,0),2)
 
     cv2.imshow("result", img)
-    cv2.waitKey()
+    # cv2.waitKey()
+    cv2.imwrite("result.png",img)
     # print(results[0].boxes)
 
 
 # Yolov8 DOCS https://docs.ultralytics.com/modes/predict/
 if __name__ == "__main__":
     # prediction_test()
-    prediction("runs\\detect\\train\\weights\\best.pt", "F:\\nematoda\\nemadote_detection\\images\\train\\img_038_id1.jpg")
+    prediction("runs\\detect\\train\\weights\\best.pt", "F:\\nematoda\\nemadote_detection\\images\\train\\img_5010_id246.jpg")
