@@ -10,9 +10,8 @@ def prediction_test():
     # model.train(data="coco128.yaml", epochs=3)  # train the model
     # metrics = model.val()  # evaluate model performance on the validation set
     results = model("bus.jpg")  # predict on an image
-    # success = model.export(format="onnx")  # export the model to ONNX format
 
-    # res_plotted = results[0].plot()
+    res_plotted = results[0].plot()
 
     # print("Results class", results[0].probs)
     #  format x1,y1,x2,y2,conf,cls
@@ -23,8 +22,8 @@ def prediction_test():
     # print(results[0].probs)
 
     # print(type(res_plotted))
-    # cv2.imshow("result", res_plotted)
-    # cv2.waitKey()
+    cv2.imshow("result", res_plotted)
+    cv2.waitKey()
     # print(results[0].boxes)
 
 def prediction(model_path,image_path):
@@ -57,5 +56,5 @@ def prediction(model_path,image_path):
 
 # Yolov8 DOCS https://docs.ultralytics.com/modes/predict/
 if __name__ == "__main__":
-    # prediction_test()
-    prediction("runs\\detect\\train\\weights\\best.pt", "F:\\nematoda\\nemadote_detection\\images\\train\\img_5010_id246.jpg")
+    prediction_test()
+    # prediction("runs\\detect\\train\\weights\\best.pt", "F:\\nematoda\\nemadote_detection\\images\\train\\img_5010_id246.jpg")

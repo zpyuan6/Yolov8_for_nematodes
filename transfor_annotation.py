@@ -127,9 +127,6 @@ def clean_and_refactor():
                 f.writelines(annotation)
                 f.close()
                 
-                
-
-
 def check_txt_annotation(image_path, txt_annotation):
 
     img = cv2.imread(image_path)
