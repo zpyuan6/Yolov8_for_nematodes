@@ -38,8 +38,8 @@ Briefly, you are required to do the following stages.
     Each line is (Class index) (Centre point x position) (Centre point y position) (Bounding box width) (Bounding box height). Note that each value in is a scale, not pixel value.
 3. Organise dataset directories as follows.
     ```
-    ../datasets/coco128/images/im0.jpg  # image
-    ../datasets/coco128/labels/im0.txt  # label
+    ../datasets/coco128/images/train/im0.jpg  # image
+    ../datasets/coco128/labels/train/im0.txt  # label
     ```
 
 Set parameters and training.
