@@ -83,11 +83,39 @@ def aHash(img):
                 hash_str=hash_str+'0'            
     return hash_str
 
+def check_two_folder(path):
+
+    saved_file = []
+    image_hashcode = []
+    duplicate_image = []
+
+    for root, folders, files in os.walk(path):
+        with tqdm.tqdm(total=len(files)) as tbar:
+            for file in files:
+                if file.split(".")[-1]=="jpg" or file.split(".")[-1]=="JPG":
+                    img = plt.imread(os.path.join(root, file))
+                    hash = aHash(img)
+                    if hash in image_hashcode:
+                        index = image_hashcode.index(hash)
+                        duplicate_image.append([os.path.join(root,file), saved_file[index]])
+                    else:
+                        saved_file.append(os.path.join(root,file))
+                        image_hashcode.append(hash)
+                
+                tbar.update(1)
+                tbar.set_description(f"duplicate num: {len(duplicate_image)}")
+
+    
+    print(duplicate_image)
+                
+    
+
+
 def check_duplicate_image(path):
     image_hashcode = []
     duplicate_image = []
     for root, folders, files in os.walk(path):
-        with tqdm.tqdm(total=len(files)/2) as tbar:
+        with tqdm.tqdm(total=len(files)) as tbar:
             for file in files:
                 if file.split(".")[-1]=="jpg" or file.split(".")[-1]=="JPG":
                     img = plt.imread(os.path.join(root, file))
@@ -101,6 +129,8 @@ def check_duplicate_image(path):
                 tbar.set_description(f"duplicate num: {len(duplicate_image)}")
     
     print(duplicate_image)
+
+    return duplicate_image, files
     
 def delete_duplicate_image(path):
     duplicate = ['IMG_20220519_103327.jpg', 'IMG_20220519_103408.jpg', 'IMG_20220519_104141.jpg', 'IMG_20220519_104244.jpg', 'IMG_20220519_104502.jpg', 'IMG_20220519_104833.jpg', 'IMG_20220519_105049.jpg', 'IMG_20220519_105057.jpg', 'IMG_20220519_105104.jpg', 'IMG_20220519_105254.jpg', 'IMG_20220519_105330.jpg', 'IMG_20220519_105342.jpg', 'IMG_20220519_105420.jpg', 'IMG_20220519_105912.jpg', 'IMG_20220519_105916.jpg', 'IMG_20220519_105922.jpg', 'IMG_20220519_110109.jpg', 'IMG_20220519_110114.jpg', 'IMG_20220519_110159.jpg', 'IMG_20220519_110216.jpg', 'IMG_20220519_110220.jpg', 'IMG_20220519_110332.jpg', 'IMG_20220519_110533.jpg', 'IMG_20220519_110617.jpg', 'IMG_20220519_110647.jpg', 'IMG_20220519_110658.jpg', 'IMG_20220519_110834.jpg', 'IMG_20220519_110844.jpg', 'IMG_20220519_110926.jpg', 'IMG_20220519_110929.jpg', 'IMG_20220519_110935.jpg', 'IMG_20220519_111107.jpg', 'IMG_20220519_111230.jpg', 'IMG_20220519_111238.jpg', 'IMG_20220519_111304.jpg', 'IMG_20220519_111324.jpg', 'IMG_20220519_111330.jpg', 'IMG_20220519_111607.jpg', 'IMG_20220519_111611.jpg', 'IMG_20220519_111632.jpg', 'IMG_20220519_111655.jpg', 'IMG_20220519_111720.jpg', 'IMG_20220519_111824.jpg', 'IMG_20220519_111844.jpg', 'IMG_20220519_111951.jpg', 'IMG_20220519_112027.jpg', 'IMG_20220519_112037.jpg', 'IMG_20220519_112043.jpg', 'IMG_20220519_112058.jpg', 'IMG_20220519_112306.jpg', 'IMG_20220519_112329.jpg', 'IMG_20220519_112339.jpg', 'IMG_20220519_112343.jpg', 'IMG_20220519_112402.jpg', 'IMG_20220519_112837.jpg', 'IMG_20220519_112840.jpg', 'IMG_20220519_112923.jpg', 'IMG_20220519_113003.jpg', 'IMG_20220519_113005.jpg', 'IMG_20220519_113109.jpg', 'IMG_20220519_113119.jpg', 'IMG_20220519_113229.jpg', 'IMG_20220519_113238.jpg', 'IMG_20220519_113244.jpg', 'IMG_20220519_113410.jpg', 'IMG_20220519_113415.jpg', 'IMG_20220519_113723.jpg', 'IMG_20220519_113727.jpg', 'IMG_20220519_113733.jpg', 'IMG_20220519_114014.jpg', 'IMG_20220519_114020.jpg', 'IMG_20220519_114047.jpg', 'IMG_20220519_114102.jpg', 'IMG_20220519_114233.jpg', 'IMG_20220519_114237.jpg', 'IMG_20220519_114334.jpg', 'IMG_20220519_114527.jpg', 'IMG_20220519_114728.jpg', 'IMG_20220519_114736.jpg', 'IMG_20220519_114939.jpg', 'IMG_20220519_115255.jpg', 'IMG_20220519_115656.jpg', 'IMG_20220519_115751.jpg', 'IMG_20220519_115804.jpg', 'IMG_20220519_115808.jpg', 'IMG_20220519_115821.jpg', 'IMG_20220519_115840.jpg', 'IMG_20220519_115845.jpg', 'IMG_20220519_115901.jpg', 'IMG_20220519_115935.jpg', 'IMG_20220519_115948.jpg', 'IMG_20220519_120045.jpg', 'IMG_20220519_120117.jpg', 'IMG_20220519_120244.jpg', 'IMG_20220519_142414.jpg', 'IMG_20220519_142457.jpg', 'IMG_20220519_142831.jpg', 'IMG_20220519_142905.jpg', 'IMG_20220519_143103.jpg', 
@@ -128,8 +158,10 @@ if __name__ == "__main__":
     # transfer_file_to_build_dataset(root_folder, target_folder)
     # stat_images_and_annotation(target_folder)
 
-    path = "F:\Pest\pest_data\Dataset-2022\Annotated_Data"
+    path = "F:\\Pest\\pest_data\\Builted_Dataset_In_2022\\Annotated_Data"
 
     # check_duplicate_image(path)
 
-    delete_duplicate_image(path)
+    check_two_folder("F:\\Pest\\pest_data\\Builted_Dataset_In_2022")
+
+    # delete_duplicate_image(path)
