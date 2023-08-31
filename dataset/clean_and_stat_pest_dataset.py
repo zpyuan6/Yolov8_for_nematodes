@@ -4,6 +4,7 @@ import hashlib
 import cv2
 from matplotlib import pyplot as plt
 import tqdm
+import xml.etree.ElementTree as ET
 
 def stat_images_and_annotation(root_folder):
     file_stat = {}
@@ -146,7 +147,19 @@ def delete_duplicate_image(path):
                 os.remove(os.path.join(root, annotation_file))
 
 
-                
+def modify_class(path, class_name):
+    for root, folders, files in os.walk(path):
+        if root!=path:
+            break
+        for file in files:
+            if file.split(".")[-1] == "xml":
+                tree=ET.parse(os.path.join(root, file))
+                r = tree.getroot()
+
+                for obj in r.findall('object'):
+                    obj.find('name').text = class_name
+
+                tree.write(os.path.join(root, file), encoding='utf-8')
 
 
 
@@ -162,6 +175,8 @@ if __name__ == "__main__":
 
     # check_duplicate_image(path)
 
-    check_two_folder("F:\\Pest\\pest_data\\Builted_Dataset_In_2022")
+    # check_two_folder("F:\\Pest\\pest_data\\Builted_Dataset_In_2022")
 
     # delete_duplicate_image(path)
+
+    modify_class("F:\\nematoda\\AgriNema\\Processed_image\\PCN_RLN_x5", "Pratylenchus")

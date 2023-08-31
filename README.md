@@ -60,6 +60,12 @@ python evuation.py
 ### 1.4 Model deployment
 Yolov8 DOCS for deployment https://docs.ultralytics.com/modes/export/
 
+### 1.5 Automatic Annotation Generation
+
+```
+python dataset/build_annotation.py
+```
+
 ## 2 Useful external link
 
 - [Yolov8 Docs](https://docs.ultralytics.com/)

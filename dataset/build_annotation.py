@@ -44,16 +44,25 @@ class SetAnnotation():
         if pred.shape[0] == 0:
             return
 
-        for i in range(pred.shape[0] -1):
-            # Create a copy
-            obj = copy.deepcopy(objects)
-            # Append the copy 
-            root.append(obj)
+        nums_new_object = pred.shape[0] - len(root.findall('object'))
+
+        if nums_new_object > 0:
+            for i in range(nums_new_object):
+                # Create a copy
+                obj = copy.deepcopy(objects)
+                # Append the copy
+                root.append(obj)
+        elif nums_new_object < 0:
+            for obj in root.findall('object'):
+                root.remove(obj)
+                nums_new_object+=1
+                if nums_new_object==0:
+                    break
 
         for i, obj in enumerate(root.iter('object')):  #迭代获取所有的object节点
             print(pred[i])
             cls = self.classes[int(pred[i][5])]
-            obj.find('name').text = cls                #获取name节点信息，即bbox的类别信息
+            obj.find('name').text = cls          #获取name节点信息，即bbox的类别信息
             xmlbox = obj.find('bndbox')          #获取bbox的左上角点与右下角点坐标信息
             if int(pred[i][0]) != 0:
                 xmlbox.find('xmin').text = f'{int(pred[i][0])}'
@@ -71,14 +80,16 @@ class SetAnnotation():
 
 
 if  __name__ == '__main__':
-    path = "F:\\Pest\\pest_data\\unannotated_image"
-    model_path = "runs\\pest_uk_medium_07_062\\weights\\best.pt"
+    path = "F:\\nematoda\\AgriNema\\Processed_image\\PCN_RLN_x5"
+    model_path = "runs\\detect\\our_nemo_tiny_23_07\\weights\\best.pt"
     model = YOLO(model_path)
 
     for root, folders, files in os.walk(path):
+        if root!=path:
+            break
         for file in files:
             if file.split(".")[-1] == "JPG" or file.split(".")[-1] == "jpg" or file.split(".")[-1] == "JPEG":
-                setANN = SetAnnotation("F:\\Pest\\pest_data\\Builted_Dataset_In_2022\\Annotated_Data\\0_0.xml",os.path.join(root,file), root)
+                setANN = SetAnnotation("F:\\nematoda\\AgriNema\\Processed_image\\PCN_RLN_x5\\original_label\\Image001_ch00.xml",os.path.join(root,file), root, ["Meloidogyne", "Cyst", "Globodera", "Pratylenchus", "Ditylenchus"])
                 pred = model(os.path.join(root,file))
                 # print(pred[0])
                 setANN(file.split('.')[0],[pred[0].orig_shape[1],pred[0].orig_shape[0]],pred[0].boxes.data.cpu().numpy())

@@ -20,7 +20,7 @@ def check_and_create_folder(folder_path):
 def convert(size,box):
 
     x = (box[0] + box[2])/2.0 - 1
-    y = (box[1] + box[3])/2.0 - 1 
+    y = (box[1] + box[3])/2.0 - 1
     x = x/float(size[0])
     y = y/float(size[1])
 
@@ -31,13 +31,19 @@ def convert(size,box):
 
     return x,y,w,h
 
-def convert_annotation(annotation_file_path, list_file, classes_list:list, classes_dict:dict):
+def convert_annotation(annotation_file_path, list_file, classes_list:list, classes_dict:dict, img_file_path=None):
     voc_annotation_file = open(annotation_file_path, encoding='utf-8')
     tree = ET.parse(voc_annotation_file)
     root = tree.getroot()
 
     width = root.find('size')[0].text
     height = root.find('size')[1].text
+
+    if int(width) == 0:
+        img = io.imread(img_file_path)
+        width = img.shape[1]
+        height = img.shape[0]
+        print(img.shape)
 
     for obj in root.iter('object'):
         cls = obj.find('name').text
@@ -116,7 +122,7 @@ def convert_xml_to_yolo(source_folder, target_folder):
 
                     annotation_file = open(os.path.join(train_yolo_label_folder,file_name+".txt"), 'w', encoding='utf-8')
 
-                    convert_annotation(os.path.join(root,file_name+".xml"),annotation_file, classes_list, classes_dict)
+                    convert_annotation(os.path.join(root,file_name+".xml"), annotation_file, classes_list, classes_dict, os.path.join(root,file))
 
                     annotation_file.write('\n')
 
@@ -129,7 +135,7 @@ def convert_xml_to_yolo(source_folder, target_folder):
 
                     annotation_file = open(os.path.join(val_yolo_label_folder,file_name+".txt"), 'w', encoding='utf-8')
 
-                    convert_annotation(os.path.join(root,file_name+".xml"),annotation_file, classes_list, classes_dict)
+                    convert_annotation(os.path.join(root,file_name+".xml"), annotation_file, classes_list, classes_dict, os.path.join(root,file))
 
                     annotation_file.write('\n')
 
@@ -254,14 +260,14 @@ if __name__ == "__main__":
     # yolo_path = "F:\\Pest\\pest_data\\YOLO_All_Classes_2023"
     # voc_path = "F:\\Pest\\pest_data\\Annotated_Data"
     # yolo_path = "F:\\Pest\\pest_data\\yolo"
-    # voc_path = "F:\\nematoda\\our_dataset\\dataset_7_23"
-    # yolo_path = "F:\\nematoda\\our_dataset\\YoloDataset"
-    voc_path = "F:\\nematoda\\Microorganism\\Dataset"
-    yolo_path = "F:\\nematoda\\Microorganism\\YOLO"
+    voc_path = "F:\\nematoda\\AgriNema\\Dataset_0831"
+    yolo_path = "F:\\nematoda\\AgriNema\\Yolo_0831"
+    # voc_path = "F:\\nematoda\\Microorganism\\Dataset"
+    # yolo_path = "F:\\nematoda\\Microorganism\\YOLO"
     # copy_annotation(yolo_path, voc_path)
-    # convert_xml_to_yolo(voc_path, yolo_path)
+    convert_xml_to_yolo(voc_path, yolo_path)
 
-    convert_yolo_to_xml("F:\\nematoda\\Celegans\\labels","F:\\nematoda\\Celegans\\VOC2007\\Annotations")
+    # convert_yolo_to_xml("F:\\nematoda\\Celegans\\labels","F:\\nematoda\\Celegans\\VOC2007\\Annotations")
 
     # check_annotation(yolo_path)
     # # print(os.path.exists("F:\\Pest\\pest_data\\yolo\\images\\train\\IMG_7544.JPG"))
