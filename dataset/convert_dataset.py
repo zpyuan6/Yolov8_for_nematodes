@@ -50,8 +50,8 @@ def convert_annotation(annotation_file_path, list_file, classes_list:list, class
 
         print(annotation_file_path,cls)
 
-        if cls == 'Other object' or cls == 'Other' or cls == 'other':
-            continue
+        # if cls == 'Other object' or cls == 'Other' or cls == 'other':
+        #     continue
 
         if cls not in classes_list:
             classes_list.append(cls)
