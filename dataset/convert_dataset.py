@@ -11,7 +11,7 @@ import numpy as np
 
 CLASSES = ['pest', 'unknown', 'spider', 'fly', 'snail', 'aphid', 'slug', 'beetle', 'Pest', 'Fly', 'Beetle', 'snails', 'cabbage\\taphid']
 # CLASSES_MAP = [0,0,1,2,3,4,5,6,0,2,6,3,4]
-CLASSES_MAP = [0,1,2,3,4,5,6,7,8,9]
+CLASSES_MAP = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 
 def check_and_create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -50,8 +50,11 @@ def convert_annotation(annotation_file_path, list_file, classes_list:list, class
 
         print(annotation_file_path,cls)
 
-        # if cls == 'Other object' or cls == 'Other' or cls == 'other':
-        #     continue
+        if cls == 'Other object' or cls == 'Other' or cls == 'other':
+            continue
+
+        if cls == 'Potato_Cyst' or cls == 'Potato cyst nematodes':
+            cls = 'Cyst'
 
         if cls not in classes_list:
             classes_list.append(cls)
@@ -260,8 +263,8 @@ if __name__ == "__main__":
     # yolo_path = "F:\\Pest\\pest_data\\YOLO_All_Classes_2023"
     # voc_path = "F:\\Pest\\pest_data\\Annotated_Data"
     # yolo_path = "F:\\Pest\\pest_data\\yolo"
-    voc_path = "F:\\nematoda\\AgriNema\\Dataset_0831"
-    yolo_path = "F:\\nematoda\\AgriNema\\Yolo_0831"
+    voc_path = "F:\\nematoda\\AgriNema\\original_mix_data"
+    yolo_path = "F:\\nematoda\\AgriNema\\Formated_Dataset\\Yolo_21Oct"
     # voc_path = "F:\\nematoda\\Microorganism\\Dataset"
     # yolo_path = "F:\\nematoda\\Microorganism\\YOLO"
     # copy_annotation(yolo_path, voc_path)

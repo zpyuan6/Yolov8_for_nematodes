@@ -80,16 +80,19 @@ class SetAnnotation():
 
 
 if  __name__ == '__main__':
-    path = "F:\\nematoda\\AgriNema\\Processed_image\\PCN_RLN_x5"
-    model_path = "runs\\detect\\our_nemo_tiny_23_07\\weights\\best.pt"
+    path = "F:\\pest_data\\Multitask_or_multimodality\\unannotated_images"
+    model_path = "runs\\pest_uk_medium_07_062\\weights\\best.pt"
+    # class_list = ["Meloidogyne", "Cyst", "Globodera", "Pratylenchus", "PCN j2", "Ditylenchus"]
+    class_list = ["Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta"]
+
     model = YOLO(model_path)
 
     for root, folders, files in os.walk(path):
         if root!=path:
             break
         for file in files:
-            if file.split(".")[-1] == "JPG" or file.split(".")[-1] == "jpg" or file.split(".")[-1] == "JPEG":
-                setANN = SetAnnotation("F:\\nematoda\\AgriNema\\Processed_image\\PCN_RLN_x5\\original_label\\Image001_ch00.xml",os.path.join(root,file), root, ["Meloidogyne", "Cyst", "Globodera", "Pratylenchus", "Ditylenchus"])
-                pred = model(os.path.join(root,file))
+            if file.split(".")[-1] == "JPG" or file.split(".")[-1] == "jpg" or file.split(".")[-1] == "JPEG" or file.split(".")[-1] == "tif":
+                setANN = SetAnnotation("F:\\pest_data\\Multitask_or_multimodality\\annotated_images\\0x1a37ffe63075ee0.xml",os.path.join(root,file), root, class_list)
+                pred = model(os.path.join(root,file), conf=0.585)
                 # print(pred[0])
-                setANN(file.split('.')[0],[pred[0].orig_shape[1],pred[0].orig_shape[0]],pred[0].boxes.data.cpu().numpy())
+                setANN('.'.join(file.split('.')[0:-1]), [pred[0].orig_shape[1],pred[0].orig_shape[0]],pred[0].boxes.data.cpu().numpy())

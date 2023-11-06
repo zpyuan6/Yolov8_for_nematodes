@@ -204,6 +204,33 @@ def renew_image(path, target_folder):
                 shutil.copyfile(os.path.join(root,file), os.path.join(target_folder ,f"{image_hash}.JPG"))
 
 
+def stat_modal_info(path):
+    time = {}
+    crops = {}
+    for root, folder, files in os.walk(path):
+        for file in files:
+            if file.split(".")[-1] == "txt":
+                f = open(os.path.join(root,file),"r")
+                time_crops = [int(i) for i in f.readlines()[0].strip().split(" ") ] 
+
+                if time_crops[0] in time:
+                    time[time_crops[0]] = time[time_crops[0]]+1
+                else:
+                    time[time_crops[0]] = 1
+
+                if time_crops[1] in crops:
+                    crops[time_crops[1]] = crops[time_crops[1]]+1
+                else:
+                    crops[time_crops[1]] = 1
+
+                f.close()
+    #        1, 2, 3, 4, 5,  6,  7,  8,  9,  10, 11,12
+    month = [0,31,59,90,120,151,181,212,243,273,304,334]
+
+    print(f"------------time------ \n{time}") 
+    print(f"------------crop------ \n{crops}") 
+
+
 if __name__ == "__main__":
     original_path = ["F:\\pest_data\\original_image"]
     target_path = "F:\\pest_data\\Multitask_or_multimodality"
@@ -213,7 +240,7 @@ if __name__ == "__main__":
     # path = "F:\\pest_data\\original_image\\Builted_Dataset_In_2023_Before_June_05\\IMG_8997.JPG"
     # test_img(path)
 
-    format_multimodal_annotation("F:\\pest_data\\Multitask_or_multimodality\\annotated_images")
+    # format_multimodal_annotation("F:\\pest_data\\Multitask_or_multimodality\\annotated_images")
 
     l = ['0x130b0df4faa39020', '0x27bf9f47172f8021', '0x38b8783e26078108', '0x3a19007fbc62067c', '0x3f4c4da9e50d1d9c', '0x50c02cecf0323c3', '0x61cafbaadfb8821c', '0x670626a633b8f9fc', '0x74b0c0e734d3bbfd', '0x7871d30e894c230d', '0x7eff5f0f07030118', '0x7f7658607064a073', '0x830203001d3e7f63', '0x9c99c0c48aeae481', '0x9e2be70e5c680a44', '0x9fc07a181fc3f0c4', '0xafce1ee0000e0d0', '0xbd5e1f0f070301e9', '0xc44dee3387c3bd86', '0xcbd648a79de8c0f7', '0xd0eb6484126811a5', '0xd73b1b23f920cd37', '0xe0aa743c390f1e48', '0xe0f8e1d838fef8', '0xe1fbb40280d880ec', '0xe20444fe105e8472', '0xe4f4f990e0f8f401', '0xf1b25b3d71108e87', '0xf4f8fce402110800', '0xf8fc9c80f00d32fc', '0xf8fcfcecfcfcf8f0', '0xfce4c1e771e0f86d', '0xfffff7e1c0c0e0e0', '0xfffffefafbfbd8ec']
 
@@ -222,6 +249,8 @@ if __name__ == "__main__":
     #     print(image_id, image.getexif())
     # search_original_img(l, ["F:\\pest_data\\a"])
     # renew_image("F:\\pest_data\\b", "F:\\pest_data\\Multitask_or_multimodality\\annotated_images")
+
+    stat_modal_info("F:\\pest_data\\Multitask_or_multimodality\\annotated_images")
 
 
 
