@@ -31,7 +31,7 @@ def prediction_test():
     cv2.waitKey()
     # print(results[0].boxes)
 
-def prediction(model_path,image_path, conf, savepath=None):
+def prediction(model_path,image_path, conf=0.5, savepath=None):
     # model = YOLO("yolov8n.yaml")  # build a new model from scratch
     model = YOLO(model_path)  # load a pretrained model (recommended for training)
 
@@ -42,6 +42,7 @@ def prediction(model_path,image_path, conf, savepath=None):
     results = model(image_path, conf=conf)  # predict on an image
     t2 = time.time()
     print(f"Spend {(t2-t1)*1000} ms ")
+    print(results[0].boxes)
 
     # #  format x1,y1,x2,y2,conf,cls
     # print("Bounding box", results[0])
@@ -115,15 +116,15 @@ if __name__ == "__main__":
     # prediction_test()
     # prediction("runs\\detect\\train\\weights\\best.pt", "F:\\nematoda\\nemadote_detection\\images\\train\\img_5010_id246.jpg")
 
-    # prediction("runs\\nematodes_medium_31_08\\weights\\best.pt", "F:\\nematoda\\AgriNema\\unannotated_data\\Test\\PCN float 2 (2.0).jpg")
+    prediction("runs\\nematodes_medium_21_10\\weights\\best.torchscript", "F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_x5\\original_label\\Mixture_Image001_ch00.jpg")
 
-    pathes = [
-        "F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_x10",
-        # "F:\\nematoda\\AgriNema\\unannotated_data\\Test\\annotation",
-        # "F:\\nematoda\\AgriNema\\unannotated_data\\Potato cyst nematodes (for AI training)",
-        # "F:\\nematoda\\AgriNema\\unannotated_data\\PCN+RLN_Sept",
-        # "F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_x5"
-        ]
+    # pathes = [
+    #     "F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_x10",
+    #     # "F:\\nematoda\\AgriNema\\unannotated_data\\Test\\annotation",
+    #     # "F:\\nematoda\\AgriNema\\unannotated_data\\Potato cyst nematodes (for AI training)",
+    #     # "F:\\nematoda\\AgriNema\\unannotated_data\\PCN+RLN_Sept",
+    #     # "F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_x5"
+    #     ]
 
-    for path in pathes:
-        draw_results_from_folder("runs\\nematodes_tiny_21_10\\weights\\best.pt", path)
+    # for path in pathes:
+    #     draw_results_from_folder("runs\\nematodes_tiny_21_10\\weights\\best.pt", path)
