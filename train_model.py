@@ -15,7 +15,7 @@ if __name__ == "__main__":
     print(type(weight_model['model']))
     
     model_large.model.load(weight_model['model'])
-    # model_large.train(data="nematodes.yaml", epochs=400, imgsz=640, batch=32, name= "nematodes_tiny_11_Dec")
+    model_large.train(data="nematodes.yaml", epochs=400, imgsz=640, batch=32, name= "nematodes_tiny_attention_11_Dec")
 
     # model_large = YOLO(model_list[1])
     # model_large.train(data="nematodes.yaml", epochs=200, imgsz=640, batch=16, name= "nematodes_medium_31_08")
