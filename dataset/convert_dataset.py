@@ -258,6 +258,14 @@ def check_annotation(yolo_folder):
             present_annotation(os.path.join(root, file), os.path.join(annotation_folder,folder,file.split(".")[0]+".txt"))
 
 
+def rename_file(folder, predix):
+
+    for root, folders, files in os.walk(folder):
+        for file in files:
+            os.rename(os.path.join(root, file), os.path.join(root, f"{predix}_{file}"))
+
+
+
 if __name__ == "__main__":
     # voc_path = "F:\\Pest\\pest_data\\Pest_Dataset_2023"
     # yolo_path = "F:\\Pest\\pest_data\\YOLO_All_Classes_2023"
@@ -268,7 +276,7 @@ if __name__ == "__main__":
     # voc_path = "F:\\nematoda\\Microorganism\\Dataset"
     # yolo_path = "F:\\nematoda\\Microorganism\\YOLO"
     # copy_annotation(yolo_path, voc_path)
-    convert_xml_to_yolo(voc_path, yolo_path)
+    # convert_xml_to_yolo(voc_path, yolo_path)
 
     # convert_yolo_to_xml("F:\\nematoda\\Celegans\\labels","F:\\nematoda\\Celegans\\VOC2007\\Annotations")
 
@@ -277,3 +285,5 @@ if __name__ == "__main__":
     # present_annotation("F:\\Pest\\pest_data\\yolo\\images\\train\\IMG_8059.JPG", "F:\\Pest\\pest_data\\yolo\\labels\\train\\IMG_8059.txt")
     # train_list = ["IMG_7419","IMG_7422","IMG_7423","IMG_7424","IMG_7425","IMG_7426","IMG_7427","IMG_7428","IMG_7429","IMG_7430","IMG_7548","IMG_7552","IMG_7558","IMG_7559","IMG_7572","IMG_7574","IMG_7575","IMG_7579","IMG_7580","IMG_7587","IMG_7597","IMG_7598","IMG_7599","IMG_7600","IMG_7601","IMG_7602","IMG_7603","IMG_7604","IMG_7605","IMG_7617","IMG_7618","IMG_7619","IMG_7620","IMG_762","IMG_7622","IMG_7623","IMG_7987","IMG_7988","IMG_7991","IMG_7994","IMG_7995","IMG_7996","IMG_7997","IMG_7998","IMG_7999","IMG_8001","IMG_8003","IMG_8004","IMG_8005","IMG_8006","IMG_8007","IMG_8009","IMG_8010","IMG_8013","IMG_8014","IMG_8015","IMG_8016","IMG_8017","IMG_8018","IMG_8023","IMG_8024","IMG_8025","IMG_8026","IMG_8027","IMG_8029","IMG_8030","IMG_8031","IMG_8033","IMG_8034","IMG_8034","IMG_8036","IMG_8037","IMG_8038","IMG_8039","IMG_8040","IMG_8041","IMG_8043","IMG_8045","IMG_8046","IMG_8047","IMG_8048","IMG_8049","IMG_8050","IMG_8051","IMG_8053","IMG_8054","IMG_8055","IMG_8056","IMG_8057","IMG_8058","IMG_8059","IMG_8060","IMG_8061","IMG_8062","IMG_8063","IMG_8064","IMG_8065","IMG_8066","IMG_8067","IMG_8068","IMG_8069","IMG_8071","IMG_8073","IMG_8075","IMG_8076","IMG_8077","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
     # val_list = []
+
+    rename_file("F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_JPEG_unfinished\\Original_annotation","pcn_rln_x5")

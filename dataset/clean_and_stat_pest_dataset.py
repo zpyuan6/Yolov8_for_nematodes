@@ -111,7 +111,6 @@ def check_two_folder(path):
                 
     
 
-
 def check_duplicate_image(path):
     image_hashcode = []
     duplicate_image = []

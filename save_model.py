@@ -327,7 +327,9 @@ def save_mmodel_as_torchscript(model_path):
     model.export(format='torchscript', imgsz=640)
 
 if __name__ == "__main__":
-    model_path = "runs\\nematodes_medium_21_10\\weights\\nematodedetection.torchscript"
-    image_path = "F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_x5\\original_label\\Mixture_Image001_ch00.jpg"
+    # model_path = "runs\\nematodes_medium_21_10\\weights\\nematodedetection.torchscript"
+    # image_path = "F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_x5\\original_label\\Mixture_Image001_ch00.jpg"
 
-    test_model_running(model_path,image_path)
+    # test_model_running(model_path,image_path)
+
+    save_mmodel_as_torchscript("runs\\pest_uk_medium_07_062\\weights\\best.pt")
