@@ -261,6 +261,7 @@ def check_annotation(yolo_folder):
 def rename_file(folder, predix):
 
     for root, folders, files in os.walk(folder):
+        
         for file in files:
             os.rename(os.path.join(root, file), os.path.join(root, f"{predix}_{file}"))
 
