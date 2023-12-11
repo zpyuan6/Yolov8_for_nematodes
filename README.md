@@ -12,6 +12,10 @@ I recommend using [Conda](https://www.anaconda.com/) to manage your Python envir
 ```
 git clone https://github.com/zpyuan6/Yolov8_for_nematodes.git
 cd Yolov8_for_nematodes
+conda create -n yolov8 python=3.8.16 
+conda activate yolov8
+pip install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116
+pip install scikit-image
 pip install -r requirements.txt
 ```
 
@@ -55,6 +59,12 @@ python evuation.py
 
 ### 1.4 Model deployment
 Yolov8 DOCS for deployment https://docs.ultralytics.com/modes/export/
+
+### 1.5 Automatic Annotation Generation
+
+```
+python dataset/build_annotation.py
+```
 
 ## 2 Useful external link
 
