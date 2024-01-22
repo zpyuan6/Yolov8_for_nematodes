@@ -11,7 +11,7 @@ import numpy as np
 
 CLASSES = ['pest', 'unknown', 'spider', 'fly', 'snail', 'aphid', 'slug', 'beetle', 'Pest', 'Fly', 'Beetle', 'snails', 'cabbage\\taphid']
 # CLASSES_MAP = [0,0,1,2,3,4,5,6,0,2,6,3,4]
-CLASSES_MAP = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+CLASSES_MAP = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,16,20,21,22,23,24,25,26,27,28,29,30]
 
 def check_and_create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -31,13 +31,15 @@ def convert(size,box):
 
     return x,y,w,h
 
-def convert_annotation(annotation_file_path, list_file, classes_list:list, classes_dict:dict, img_file_path=None):
+def convert_annotation(annotation_file_path, list_file, classes_list:list, classes_dict:dict, img_file_path=None, classes_name_list=None):
     voc_annotation_file = open(annotation_file_path, encoding='utf-8')
     tree = ET.parse(voc_annotation_file)
     root = tree.getroot()
 
     width = root.find('size')[0].text
     height = root.find('size')[1].text
+
+    have_class_name_list = False if len(classes_list)==0 else True
 
     if int(width) == 0:
         img = io.imread(img_file_path)
@@ -46,25 +48,64 @@ def convert_annotation(annotation_file_path, list_file, classes_list:list, class
         print(img.shape)
 
     for obj in root.iter('object'):
-        cls = obj.find('name').text
+        cls = obj.find('name').text.upper()
 
-        print(annotation_file_path,cls)
+        if "UNIDENTIFIABLE" in cls:
+            print(annotation_file_path)
 
-        if cls == 'Other object' or cls == 'Other' or cls == 'other':
-            continue
+        if "POLLEN BEETLE" in cls:
+            cls = "POLLEN BEETLE (MELIGETHES SPP.)"
 
-        if cls == 'Potato_Cyst' or cls == 'Potato cyst nematodes':
-            cls = 'Cyst'
+        if "FLY" in cls or "DIPTERA" in cls or "MUSCIDAE" in cls or "DELIA SPP" in cls or "FUNGUS GNAT" in cls or "BIBIONID" in cls or "MELANOSTOMA" in cls:
+            cls = "FLY"
 
-        if cls not in classes_list:
-            classes_list.append(cls)
-            cls_id = CLASSES_MAP[classes_list.index(cls)]
-            classes_dict[cls_id] = 1
+        if "WASP" in cls:
+            cls = "WASP"
+        
+        if "GRAIN APHID" in cls:
+            cls = 'GRAIN APHID (SITOBION AVENAE)'
+
+        if "CHIRONOMID MIDGE" in cls:
+            cls = "CHIRONOMID MIDGE"
+
+        if "LADYBUG" in cls:
+            cls = 'COCCINELLIDAE (LADYBUG)'
+
+        if cls == "BEETLE" or cls == "SCARABAEIDAE" or "GROUND BETTLE" in cls:
+            cls = "COLEOPTERA"
+
+        if cls == "INSECT":
+            cls = "INSECTA"
+
+        if cls == "PLANT BUG (HEMIPTERA)" or cls == "FROG HOPPER":
+            cls == "HEMIPTERA (PLANT BUG)"
+
+        # print(annotation_file_path,cls)
+
+        # if cls == 'Other object' or cls == 'Other' or cls == 'other':
+        #     continue
+
+        # if cls == 'Potato_Cyst' or cls == 'Potato cyst nematodes':
+        #     cls = 'Cyst'
+
+        # print(classes_list)
+        if have_class_name_list:
+            print(cls, " ", annotation_file_path)
+            cls_id = classes_list.index(cls)
+            if cls_id in classes_dict:
+                classes_dict[cls_id] += 1
+            else:
+                classes_dict[cls_id] = 1
         else:
-            cls_id = CLASSES_MAP[classes_list.index(cls)]
-            classes_dict[cls_id] += 1
+            if cls not in classes_list:
+                classes_list.append(cls)
+                cls_id = CLASSES_MAP[classes_list.index(cls)]
+                classes_dict[cls_id] = 1
+            else:
+                cls_id = CLASSES_MAP[classes_list.index(cls)]
+                classes_dict[cls_id] += 1
+            # cls_id = CLASSES_MAP[classes_list.index(cls)]
 
-        cls_id = CLASSES_MAP[classes_list.index(cls)]
         # cls_id = 0
         xmlbox = obj.find('bndbox')
         b = (float(xmlbox.find('xmin').text), float(xmlbox.find('ymin').text), float(xmlbox.find('xmax').text), float(xmlbox.find('ymax').text))
@@ -95,11 +136,11 @@ def convert_dataset_from_voc_to_yolo(original_path, target_path):
     check_and_create_folder(val_yolo_label_folder)
 
 
-def convert_xml_to_yolo(source_folder, target_folder):
+def convert_xml_to_yolo(source_folder, target_folder, classes_name_list=None):
     train_val = 0.8
 
     classes_dict = {}
-    classes_list = []
+    classes_list = [] if classes_name_list==None else classes_name_list
 
     train_yolo_image_folder = os.path.join(target_folder, "images\\train")
     val_yolo_image_folder = os.path.join(target_folder, "images\\val")
@@ -115,7 +156,7 @@ def convert_xml_to_yolo(source_folder, target_folder):
     for root, folders, files in os.walk(source_folder):
         for file in files:
             file_name,file_type = os.path.splitext(file)
-            if not file_type == ".xml":
+            if not (file_type == ".xml" or file_type == ".txt"):
                 ro = random.random()
                 if ro < train_val:
                     # if file_type == ".JPG":
@@ -152,8 +193,35 @@ def convert_yolo_to_xml(source_folder, out_folder):
 
     for root, folders, files in os.walk(source_folder):
         for file in files:
-            annotation = SetAnnotation("F:\\pest_data\\Builted_Dataset_In_2022\\Annotated_Data\\0_0.xml", root, out_folder, ["CaenorhabditisElegans"])
+            image_path = os.path.join(root,file).replace("labels","images").replace("txt","JPG")
+            # width, height
+            img_shape = Image.open(image_path).size
+            annotation = SetAnnotation("F:\\pest_data\\Multitask_or_multimodality\\annotated_data\\0x0.xml", root, out_folder, [
+                "INSECTA",
+                "GRAIN APHID (SITOBION AVENAE)",
+                "POLLEN BEETLE (MELIGETHES SPP.)",
+                "SNAIL",
+                "POLYGONUM LEAF BETTLE (GASTROPHYSA POLYGONI)",
+                "FLY",
+                "CABBAGE STEM FLEA BETTLE",
+                "COCCINELLIDAE (LADYBUG)",
+                "SPIDER",
+                "CHIRONOMID MIDGE",
+                "COLEOPTERA",
+                "MOSQUITO",
+                "WASP",
+                "SLUG",
+                "FROG HOPPER",
+                "ARANEUS SPP",
+                "HEMIPTERA (PLANT BUG)",
+                "EARTHWORM",
+                "LEAF MINERS"
+            ])
             bboxs = np.loadtxt(os.path.join(root,file))
+            if bboxs.shape == (0,):
+                continue
+            if len(bboxs.shape)==1:
+                bboxs = np.expand_dims(bboxs, 0)
             bboxs = np.insert(bboxs, 5, values=bboxs[:,0], axis=1)
             bboxs = np.insert(bboxs, 6, values=bboxs[:,0], axis=1)
             bboxs = np.delete(bboxs, 0, axis=1)
@@ -161,7 +229,7 @@ def convert_yolo_to_xml(source_folder, out_folder):
             bboxs[:,2] = bboxs[:,0]+bboxs[:,2]
             bboxs[:,1] = bboxs[:,1]-(bboxs[:,3]/2)   
             bboxs[:,3] = bboxs[:,1]+bboxs[:,3]
-            annotation(file.split('.')[0],[3280, 2464], bboxs)
+            annotation(file.split('.')[0], img_shape, bboxs)
 
 
 def copy_annotation(yolo_folder,voc_folder):
@@ -265,21 +333,56 @@ def rename_file(folder, predix):
         for file in files:
             os.rename(os.path.join(root, file), os.path.join(root, f"{predix}_{file}"))
 
+def copy_from_yolo(orign_yolo_folder,img_anno_folder,target_folder):
 
+    id_list = []
+    for root, folders, files in os.walk(os.path.join(orign_yolo_folder,"labels")):
+        for file in files:
+            if file.split(".")[-1] == "txt":
+                img_id = file.split(".")[0]
+                if img_id not in id_list:
+                    id_list.append(img_id)
+                    shutil.copy2(os.path.join(img_anno_folder, f"{img_id}.JPG"),os.path.join(target_folder, f"{img_id}.JPG"))
+                    shutil.copy2(os.path.join(img_anno_folder, f"{img_id}.xml"),os.path.join(target_folder, f"{img_id}.xml"))
 
 if __name__ == "__main__":
-    # voc_path = "F:\\Pest\\pest_data\\Pest_Dataset_2023"
-    # yolo_path = "F:\\Pest\\pest_data\\YOLO_All_Classes_2023"
-    # voc_path = "F:\\Pest\\pest_data\\Annotated_Data"
-    # yolo_path = "F:\\Pest\\pest_data\\yolo"
-    org_path = "F:\\nematoda\\AgriNema\\original_annotated_data"
-    yolo_path = "F:\\nematoda\\AgriNema\\Formated_Dataset\\Yolo_11Dec"
+    # org_path = "F:\\pest_data\\Multitask_or_multimodality\\annotated_data"
+    org_path = "F:\\pest_data\\Multitask_or_multimodality\\temp"
+    yolo_path = "F:\\pest_data\\Multitask_or_multimodality\\YOLO_24Dec"
+
+    # org_path = "F:\\nematoda\\AgriNema\\original_annotated_data"
+    # yolo_path = "F:\\nematoda\\AgriNema\\Formated_Dataset\\Yolo_11Dec"
     # voc_path = "F:\\nematoda\\Microorganism\\Dataset"
     # yolo_path = "F:\\nematoda\\Microorganism\\YOLO"
     # copy_annotation(yolo_path, voc_path)
-    convert_xml_to_yolo(org_path, yolo_path)
+    # convert_xml_to_yolo(org_path, yolo_path)
 
-    # convert_yolo_to_xml("F:\\nematoda\\Celegans\\labels","F:\\nematoda\\Celegans\\VOC2007\\Annotations")
+    classes_name_list = [
+        "INSECTA",
+        "GRAIN APHID (SITOBION AVENAE)",
+        "POLLEN BEETLE (MELIGETHES SPP.)",
+        "SNAIL",
+        "POLYGONUM LEAF BETTLE (GASTROPHYSA POLYGONI)",
+        "FLY",
+        "CABBAGE STEM FLEA BETTLE",
+        "COCCINELLIDAE (LADYBUG)",
+        "SPIDER",
+        "CHIRONOMID MIDGE",
+        "COLEOPTERA",
+        "MOSQUITO",
+        "WASP",
+        "SLUG",
+        "FROG HOPPER",
+        "ARANEUS SPP",
+        "HEMIPTERA (PLANT BUG)",
+        "EARTHWORM",
+        "LEAF MINERS"
+    ]
+    # convert_xml_to_yolo(org_path, yolo_path,classes_name_list)
+
+    # copy_from_yolo("F:\\pest_data\Multitask_or_multimodality\\YOLO_24Dec", "F:\\pest_data\\Multitask_or_multimodality\\annotated_data", "F:\\pest_data\\Multitask_or_multimodality\\temp")
+
+    convert_yolo_to_xml("F:\\pest_data\\Multitask_or_multimodality\\YOLO_01JAN\\labels","F:\\pest_data\\Multitask_or_multimodality\\VOCdevkit\\VOC2007\\Annotations")
 
     # check_annotation(yolo_path)
     # # print(os.path.exists("F:\\Pest\\pest_data\\yolo\\images\\train\\IMG_7544.JPG"))
