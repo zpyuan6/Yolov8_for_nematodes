@@ -50,45 +50,15 @@ def convert_annotation(annotation_file_path, list_file, classes_list:list, class
     for obj in root.iter('object'):
         cls = obj.find('name').text.upper()
 
-        if "UNIDENTIFIABLE" in cls:
-            print(annotation_file_path)
-
-        if "POLLEN BEETLE" in cls:
-            cls = "POLLEN BEETLE (MELIGETHES SPP.)"
-
-        if "FLY" in cls or "DIPTERA" in cls or "MUSCIDAE" in cls or "DELIA SPP" in cls or "FUNGUS GNAT" in cls or "BIBIONID" in cls or "MELANOSTOMA" in cls:
-            cls = "FLY"
-
-        if "WASP" in cls:
-            cls = "WASP"
-        
-        if "GRAIN APHID" in cls:
-            cls = 'GRAIN APHID (SITOBION AVENAE)'
-
         if "CHIRONOMID MIDGE" in cls:
-            cls = "CHIRONOMID MIDGE"
+            cls = 'CHIRONOMID MIDGE'
 
-        if "LADYBUG" in cls:
-            cls = 'COCCINELLIDAE (LADYBUG)'
+        if "APHID" in cls: 
+            cls = "GRAIN APHID (SITOBION AVENAE)"
 
-        if cls == "BEETLE" or cls == "SCARABAEIDAE" or "GROUND BETTLE" in cls:
-            cls = "COLEOPTERA"
+        if "FLY" in cls:
+            cls = "FLY (DIPTERA)"
 
-        if cls == "INSECT":
-            cls = "INSECTA"
-
-        if cls == "PLANT BUG (HEMIPTERA)" or cls == "FROG HOPPER":
-            cls == "HEMIPTERA (PLANT BUG)"
-
-        # print(annotation_file_path,cls)
-
-        # if cls == 'Other object' or cls == 'Other' or cls == 'other':
-        #     continue
-
-        # if cls == 'Potato_Cyst' or cls == 'Potato cyst nematodes':
-        #     cls = 'Cyst'
-
-        # print(classes_list)
         if have_class_name_list:
             print(cls, " ", annotation_file_path)
             cls_id = classes_list.index(cls)
@@ -346,9 +316,9 @@ def copy_from_yolo(orign_yolo_folder,img_anno_folder,target_folder):
                     shutil.copy2(os.path.join(img_anno_folder, f"{img_id}.xml"),os.path.join(target_folder, f"{img_id}.xml"))
 
 if __name__ == "__main__":
-    # org_path = "F:\\pest_data\\Multitask_or_multimodality\\annotated_data"
-    org_path = "F:\\pest_data\\Multitask_or_multimodality\\temp"
-    yolo_path = "F:\\pest_data\\Multitask_or_multimodality\\YOLO_24Dec"
+    org_path = "F:\\pest_data\\Multitask_or_multimodality\\annotated_data"
+    # org_path = "F:\\pest_data\\Multitask_or_multimodality\\temp"
+    yolo_path = "F:\\pest_data\\Multitask_or_multimodality\\YOLO_26MAR"
 
     # org_path = "F:\\nematoda\\AgriNema\\original_annotated_data"
     # yolo_path = "F:\\nematoda\\AgriNema\\Formated_Dataset\\Yolo_11Dec"
@@ -359,30 +329,35 @@ if __name__ == "__main__":
 
     classes_name_list = [
         "INSECTA",
-        "GRAIN APHID (SITOBION AVENAE)",
+        "GRAIN APHID (SITOBION AVENAE)",  # 2.	'GRAIN APHID (SITOBION AVENAE)'; 'ROSE GRAIN APHID'
         "POLLEN BEETLE (MELIGETHES SPP.)",
-        "SNAIL",
-        "POLYGONUM LEAF BETTLE (GASTROPHYSA POLYGONI)",
-        "FLY",
+        "SNAIL", 
+        "CEREAL LEAF BEETLE (OULEMA MELANOPUS)",
+        "FLY (DIPTERA)", # 6.	'FLY (DIPTERA)'; 'BEAN SEED FLY (DELIA SPP.)'; 'FLY (MELANOSTOMA SPP.)'; ‘BIBIONID FLY (BIBIONIDAE)'; 'MUSCIDAE (FLY)'
         "CABBAGE STEM FLEA BETTLE",
-        "COCCINELLIDAE (LADYBUG)",
-        "SPIDER",
-        "CHIRONOMID MIDGE",
-        "COLEOPTERA",
+        "LADYBUG (COCCINELLIDAE)",
+        "LADYBUG (COCCINELLIDAE) (PUPA)",
+        "LADYBUG (COCCINELLIDAE) (LARVAE)",
+        "SPIDER (ARANEUS SPP.)",
+        "CHIRONOMID MIDGE", # 12.	'CHIRONOMID MIDGE'; 'CHIRONOMID MIDGE (MALE)'
+        "BEETLE (COLEOPTERA)",
         "MOSQUITO",
         "WASP",
         "SLUG",
-        "FROG HOPPER",
-        "ARANEUS SPP",
+        "CABBAGE WHITEFLY",
+        "FROGHOPPER (CERCOPIDAE)",
+        "FUNGUS GNAT (MYCETOPHILIDAE)",
         "HEMIPTERA (PLANT BUG)",
         "EARTHWORM",
-        "LEAF MINERS"
+        "LEAF MINERS",
+        "SCARABAEIDAE",
+        "GROUND BETTLE (HARPALUS SPP)"
     ]
-    # convert_xml_to_yolo(org_path, yolo_path,classes_name_list)
+    convert_xml_to_yolo(org_path, yolo_path,classes_name_list)
 
     # copy_from_yolo("F:\\pest_data\Multitask_or_multimodality\\YOLO_24Dec", "F:\\pest_data\\Multitask_or_multimodality\\annotated_data", "F:\\pest_data\\Multitask_or_multimodality\\temp")
 
-    convert_yolo_to_xml("F:\\pest_data\\Multitask_or_multimodality\\YOLO_01JAN\\labels","F:\\pest_data\\Multitask_or_multimodality\\VOCdevkit\\VOC2007\\Annotations")
+    # convert_yolo_to_xml("F:\\pest_data\\Multitask_or_multimodality\\YOLO_01JAN\\labels","F:\\pest_data\\Multitask_or_multimodality\\VOCdevkit\\VOC2007\\Annotations")
 
     # check_annotation(yolo_path)
     # # print(os.path.exists("F:\\Pest\\pest_data\\yolo\\images\\train\\IMG_7544.JPG"))

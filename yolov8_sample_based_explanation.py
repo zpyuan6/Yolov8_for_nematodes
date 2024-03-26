@@ -47,8 +47,22 @@ def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleF
     im = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
     return im, ratio, (dw, dh)
 
-class yolov8_heatmap:
-    def __init__(self, weight, cfg, device, method, layer, backward_type, conf_threshold, ratio):
+def get_params():
+    params = {
+        'weight': 'runs/nematodes_tiny_21_10/weights/best.pt',
+        'cfg': 'models_config/yolov8n.yaml',
+        'device': 'cuda:0',
+        'method': 'GradCAM', # GradCAMPlusPlus, GradCAM, XGradCAM
+        'layer': 'model.model[9]',
+        'backward_type': 'all', # class, box, all
+        'conf_threshold': 0.6, # 0.6
+        'ratio': 0.02, # 0.02-0.1
+        'dataset_folder': 'F:\\nematoda\\AgriNema\\Formated_Dataset\\Yolo_11Dec\\images\\train'
+    }
+    return params
+
+class SimilarSamples:
+    def __init__(self, weight, cfg, device, method, layer, backward_type, conf_threshold, ratio, dataset_folder):
         device = torch.device(device)
         ckpt = torch.load(weight)
         model_names = ckpt['model'].names
@@ -64,7 +78,7 @@ class yolov8_heatmap:
 
         colors = np.random.uniform(0, 255, size=(len(model_names), 3)).astype(np.intc)
         self.__dict__.update(locals())
-    
+
     def post_process(self, result):
         logits_ = result[:, 4:]
         boxes_ = result[:, :4]
@@ -76,6 +90,11 @@ class yolov8_heatmap:
         cv2.rectangle(img, (xmin, ymin), (xmax, ymax), tuple(int(x) for x in color), 2)
         cv2.putText(img, str(name), (xmin, ymin - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.8, tuple(int(x) for x in color), 2, lineType=cv2.LINE_AA)
         return img
+
+    def save_activation(self, image_folder):
+        for root, folders, files in os.walk(image_folder):
+            print(root, files)
+
 
     def __call__(self, img_path, save_path):
         # remove dir if exist
@@ -98,60 +117,7 @@ class yolov8_heatmap:
         result = grads(tensor)
         activations = grads.activations[0].cpu().detach().numpy()
 
-        # postprocess to yolo output
-        post_result, pre_post_boxes, post_boxes = self.post_process(result[0])
-        for i in trange(int(post_result.size(0) * self.ratio)):
-            if float(post_result[i].max()) < self.conf_threshold:
-                break
-
-            self.model.zero_grad()
-            # get max probability for this prediction
-            if self.backward_type == 'class' or self.backward_type == 'all':
-                score = post_result[i].max()
-                score.backward(retain_graph=True)
-
-            if self.backward_type == 'box' or self.backward_type == 'all':
-                for j in range(4):
-                    score = pre_post_boxes[i, j]
-                    score.backward(retain_graph=True)
-
-            # process heatmap
-            if self.backward_type == 'class':
-                gradients = grads.gradients[0]
-            elif self.backward_type == 'box':
-                gradients = grads.gradients[0] + grads.gradients[1] + grads.gradients[2] + grads.gradients[3]
-            else:
-                gradients = grads.gradients[0] + grads.gradients[1] + grads.gradients[2] + grads.gradients[3] + grads.gradients[4]
-            b, k, u, v = gradients.size()
-            weights = self.method.get_cam_weights(self.method, None, None, None, activations, gradients.detach().numpy())
-            weights = weights.reshape((b, k, 1, 1))
-            saliency_map = np.sum(weights * activations, axis=1)
-            saliency_map = np.squeeze(np.maximum(saliency_map, 0))
-            saliency_map = cv2.resize(saliency_map, (tensor.size(3), tensor.size(2)))
-            saliency_map_min, saliency_map_max = saliency_map.min(), saliency_map.max()
-            if (saliency_map_max - saliency_map_min) == 0:
-                continue
-            saliency_map = (saliency_map - saliency_map_min) / (saliency_map_max - saliency_map_min)
-
-            # add heatmap and box to image
-            cam_image = show_cam_on_image(img.copy(), saliency_map, use_rgb=True)
-            cam_image = self.draw_detections(post_boxes[i], self.colors[int(post_result[i, :].argmax())], f'{self.model_names[int(post_result[i, :].argmax())]} {float(post_result[i].max()):.2f}', cam_image)
-            cam_image = Image.fromarray(cam_image)
-            cam_image.save(f'{save_path}/{i}.png')
-
-def get_params():
-    params = {
-        'weight': 'runs/nematodes_tiny_21_10/weights/best.pt',
-        'cfg': 'models_config/yolov8n.yaml',
-        'device': 'cuda:0',
-        'method': 'GradCAM', # GradCAMPlusPlus, GradCAM, XGradCAM
-        'layer': 'model.model[9]',
-        'backward_type': 'all', # class, box, all
-        'conf_threshold': 0.6, # 0.6
-        'ratio': 0.02 # 0.02-0.1
-    }
-    return params
 
 if __name__ == '__main__':
-    model = yolov8_heatmap(**get_params())
-    model(r'F:\\nematoda\\AgriNema\\Formated_Dataset\\Yolo_11Dec\\images\\val\\cMC170001 (19).JPG', 'result')
+    model = SimilarSamples(**get_params())
+    model(r'F:\\nematoda\\AgriNema\\Formated_Dataset\\Yolo_11Dec\\images\\val\\Image023.jpg', 'result')
