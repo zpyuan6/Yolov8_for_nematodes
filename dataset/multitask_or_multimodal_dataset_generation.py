@@ -178,7 +178,6 @@ def format_multimodal_annotation(annotated_data_path):
     print(CROP_LIST, PEST_LIST, classes_dict)
     print(image_no_time)
 
-
 def search_original_img(id_list, original_path):
 
     for folder_path in original_path:
@@ -205,25 +204,30 @@ def renew_image(path, target_folder):
 
 
 def stat_modal_info(path):
+    DATA_FORMAT = '%Y:%m:%d %H:%M:%S'
+
     time = {}
     crops = {}
     for root, folder, files in os.walk(path):
         for file in files:
-            if file.split(".")[-1] == "txt":
-                f = open(os.path.join(root,file),"r")
-                time_crops = [int(i) for i in f.readlines()[0].strip().split(" ") ] 
-
-                if time_crops[0] in time:
-                    time[time_crops[0]] = time[time_crops[0]]+1
+            image_id, file_type = os.path.splitext(file)
+            if not (file_type == ".xml" or  file_type == ".txt"):
+                image = Image.open(os.path.join(root, file))
+                
+                if 306 in image.getexif():
+                    photo_time = image.getexif()[306]
+                    date_label = int(datetime.strptime(photo_time, DATA_FORMAT).strftime('%j'))
                 else:
-                    time[time_crops[0]] = 1
+                    # image_no_time.append(image_id)
+                    date_label = 0
 
-                if time_crops[1] in crops:
-                    crops[time_crops[1]] = crops[time_crops[1]]+1
+                print(date_label)
+
+                if date_label in time:
+                    time[date_label] += 1
                 else:
-                    crops[time_crops[1]] = 1
+                    time[date_label] = 1
 
-                f.close()
     #        1, 2, 3, 4, 5,  6,  7,  8,  9,  10, 11,12
     month = [0,31,59,90,120,151,181,212,243,273,304,334]
 
@@ -233,7 +237,7 @@ def stat_modal_info(path):
 
 if __name__ == "__main__":
     original_path = ["F:\\pest_data\\original_image"]
-    target_path = "F:\\pest_data\\Multitask_or_multimodality"
+    target_path = "F:\\pest_data\\Multitask_or_multimodality\\annotated_data"
 
     # create_multitask_or_multimodel_dataset_from_xml(original_path, target_path)
 
@@ -250,7 +254,7 @@ if __name__ == "__main__":
     # search_original_img(l, ["F:\\pest_data\\a"])
     # renew_image("F:\\pest_data\\b", "F:\\pest_data\\Multitask_or_multimodality\\annotated_images")
 
-    stat_modal_info("F:\\pest_data\\Multitask_or_multimodality\\annotated_images")
+    stat_modal_info("F:\\pest_data\\Multitask_or_multimodality\\annotated_data")
 
 
 

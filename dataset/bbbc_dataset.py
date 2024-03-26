@@ -122,12 +122,12 @@ def random_split_dataset():
     val_set = list(set(images_id).difference(set(training_set)))
 
     for image_id in training_set:
-        shutil.copy(os.path.join(path, image_id+".jpg"), os.path.join(yolo_path,"images","train",image_id+".jpg"))
-        shutil.copy(os.path.join(path, image_id+".txt"), os.path.join(yolo_path,"labels","train",image_id+".txt"))
+        shutil.copy2(os.path.join(path, image_id+".jpg"), os.path.join(yolo_path,"images","train",image_id+".jpg"))
+        shutil.copy2(os.path.join(path, image_id+".txt"), os.path.join(yolo_path,"labels","train",image_id+".txt"))
 
     for image_id in val_set:
-        shutil.copy(os.path.join(path, image_id+".jpg"), os.path.join(yolo_path,"images","val",image_id+".jpg"))
-        shutil.copy(os.path.join(path, image_id+".txt"), os.path.join(yolo_path,"labels","val",image_id+".txt"))
+        shutil.copy2(os.path.join(path, image_id+".jpg"), os.path.join(yolo_path,"images","val",image_id+".jpg"))
+        shutil.copy2(os.path.join(path, image_id+".txt"), os.path.join(yolo_path,"labels","val",image_id+".txt"))
 
 
 if __name__=="__main__":

@@ -1,10 +1,11 @@
 import os
 import shutil
-import hashlib
 import cv2
 from matplotlib import pyplot as plt
 import tqdm
 import xml.etree.ElementTree as ET
+from PIL import Image, ExifTags
+import yaml
 
 def stat_images_and_annotation(root_folder):
     file_stat = {}
@@ -31,10 +32,10 @@ IMAGE_TYPE = ['.jpg', '.JPG', '.JPEG', '.PNG', '.heic']
 def transfer_file_to_build_dataset(root_folder, target_folder):
     def copy_file(src_path, obj_path, file_name, file_type):
         if os.path.exists(os.path.join(target_folder,file_name+file_type)):
-            tag = root.split("\\")[-1]
-            shutil.copy(os.path.join(root,file), os.path.join(target_folder,file_name+f"_{tag}"+file_type))
+            tag = src_path.split("\\")[-1]
+            shutil.copy2(os.path.join(src_path,file), os.path.join(target_folder,file_name+f"_{tag}"+file_type))
         else:
-            shutil.copy(os.path.join(root,file), os.path.join(target_folder,file_name+file_type))
+            shutil.copy2(os.path.join(src_path,file), os.path.join(target_folder,file_name+file_type))
 
 
     for root, folders, files in os.walk(root_folder):
@@ -162,6 +163,174 @@ def modify_class(path, class_name):
 
 
 
+def move_hashed_image_based_on_expert_annotation(expert_folder, hashed_folder, target_folder):
+
+    for root, folders, files in os.walk(expert_folder):
+        for file in files:
+            if file.split(".")[-1]=="jpg" or file.split(".")[-1]=="JPG":
+                img = plt.imread(os.path.join(root, file))
+                hash = aHash(img)
+                hash = hex(int(hash, 2))
+
+                if os.path.exists(os.path.join(hashed_folder, f"{hash}.JPG")):
+                    print(f"move {hash}")
+                    shutil.move(os.path.join(hashed_folder, f"{hash}.JPG"), os.path.join(target_folder, f"{hash}.JPG"))
+                    shutil.move(os.path.join(hashed_folder, f"{hash}.xml"), os.path.join(target_folder, f"{hash}.xml"))
+                    shutil.move(os.path.join(hashed_folder, f"{hash}.txt"), os.path.join(target_folder, f"{hash}.txt"))
+                else:
+                    print(f"Can not find image for {file}")
+                    shutil.copy2(os.path.join(root, file), os.path.join(target_folder, f"{hash}.JPG"))
+                    shutil.copy2(os.path.join(root, f"{file.split('.')[0]}.xml"), os.path.join(target_folder, f"{hash}.xml"))
+
+                
+def remove_rotating_from_exif(old_folder, new_folder):
+
+    for root,folders, files in os.walk(old_folder):
+        for file in files:
+            if file.split(".")[-1]=="JPG":
+                image = Image.open(os.path.join(root,file))
+
+                for orientation in ExifTags.TAGS.keys():
+                    if ExifTags.TAGS[orientation]=='Orientation':
+                        break
+                
+                exif = image.getexif()
+                if orientation in exif:
+                    if exif[orientation] != 0:
+                        print(file,exif[orientation])
+                    # exif[orientation] = 0
+                    # image.save(os.path.join(root,file), exif = exif)
+                else:
+                    print(f"Can not found orientation {file}")
+
+                image.close()
+
+def separate_complementary_images(old_dataset_yaml, new_dataset_yaml, target_path):
+    old_dataset_config = yaml.safe_load(open(old_dataset_yaml))
+    new_dataset_config = yaml.safe_load(open(new_dataset_yaml))
+
+    def statistic_dataset(dataset_config):
+        object_dict = dataset_config['names']
+        train_folder = dataset_config['path'] +"\\"+ dataset_config['train'].replace("images","labels")
+        val_folder = dataset_config['path'] +"\\"+ dataset_config['val'].replace("images","labels")
+
+        total_object_dict = {}
+
+        train_object_dict = {}
+        for root, folders, files in os.walk(train_folder):
+            train_image_num = len(files)
+            for file in files:
+                for line in open(os.path.join(root,file)):
+                    if len(line)>1:
+                        cls_id = int(line.split(" ")[0])
+                        if cls_id in train_object_dict:
+                            train_object_dict[cls_id]+=1
+                        else:
+                            train_object_dict[cls_id]=1
+
+                        if cls_id in total_object_dict:
+                            total_object_dict[cls_id]+=1
+                        else:
+                            total_object_dict[cls_id]=1
+
+        val_object_dict = {}
+        for root, folders, files in os.walk(val_folder):
+            val_image_num = len(files)
+            for file in files:
+                for line in open(os.path.join(root,file)):
+                    if len(line)>1:
+                        cls_id = int(line.split(" ")[0])
+                        if cls_id in val_object_dict:
+                            val_object_dict[cls_id]+=1
+                        else:
+                            val_object_dict[cls_id]=1
+
+                        if cls_id in total_object_dict:
+                            total_object_dict[cls_id]+=1
+                        else:
+                            total_object_dict[cls_id]=1
+
+        for cls_id in object_dict.keys():
+            if cls_id in total_object_dict:
+                total_object_dict[object_dict[cls_id]]= total_object_dict.pop(cls_id)
+            else:
+                total_object_dict[object_dict[cls_id]]=0
+
+            if cls_id in train_object_dict:
+                train_object_dict[object_dict[cls_id]]= train_object_dict.pop(cls_id)
+            else:
+                train_object_dict[object_dict[cls_id]]=0
+
+            if cls_id in val_object_dict:
+                val_object_dict[object_dict[cls_id]]= val_object_dict.pop(cls_id)
+            else:
+                val_object_dict[object_dict[cls_id]]=0
+
+        print(f"train image num: {train_image_num},\n train object dict: {train_object_dict} ")
+        print(f"val image num: {val_image_num},\n val object dict: {val_object_dict} ")
+        print(f"total image num: {train_image_num+val_image_num},\n total object dict: {total_object_dict} ")
+        
+
+    print("Old dataser-------------------------------")
+    statistic_dataset(old_dataset_config)
+    print("New dataser-------------------------------")
+    statistic_dataset(new_dataset_config)
+    
+    def get_all_image_id_dict(dataset_config):
+        train_folder = dataset_config['path'] +"\\"+ dataset_config["train"].replace("images","labels")
+        val_folder = dataset_config['path'] +"\\"+ dataset_config["val"].replace("images","labels")
+
+        img_id_dict = {}
+        for root, folders, files in os.walk(train_folder):
+            for file in files:
+                print(file)
+                img_id = file.split(".")[0]
+                img_id_dict[img_id] = os.path.join(root, file).replace("labels","images").replace("txt","JPG")
+
+        for root, folders, files in os.walk(val_folder):
+            for file in files:
+                print(file)
+                img_id = file.split(".")[0]
+                img_id_dict[img_id] = os.path.join(root, file).replace("labels","images").replace("txt","JPG")
+
+        return img_id_dict
+
+    old_dataset_id = get_all_image_id_dict(old_dataset_config)
+    new_dataset_id = get_all_image_id_dict(new_dataset_config)
+
+    print("\n Old dataser-------------------------------")
+    print(len(old_dataset_id.keys()))
+    print("\n New dataser-------------------------------")
+    print(len(new_dataset_id.keys()))
+
+    
+    with tqdm.tqdm(total=len( new_dataset_id.keys())) as tbar:
+        for img_id in new_dataset_id.keys():
+            tbar.update(1)
+            if not img_id in old_dataset_id:
+                shutil.copy2(new_dataset_id[img_id], os.path.join(target_path,img_id+".JPG")) 
+
+    for img_id in old_dataset_id.keys():
+            if not img_id in new_dataset_id:
+                print(f"Can not found {img_id}")
+
+
+def copy_xml_annotation(original_path, target_path):
+    img_ids = set([])
+    for root, folders, files in os.walk(target_path):
+        for file in files:
+            img_id = file.split(".")[0]
+            img_ids.add(img_id)
+
+    for img_id in img_ids:
+        if os.path.exists(os.path.join(original_path,img_id+".xml")):
+            shutil.copy2(os.path.join(original_path,img_id+".xml"), os.path.join(target_path,img_id+".xml"))
+        else:
+            print(f"can not found xml annotation for {img_id}")
+
+
+
+
 if __name__ == "__main__":
     # root_folder = "F:\\Pest\\pest_data\\UK_Pest_Original"
     # stat_images_and_annotation(root_folder)
@@ -169,7 +338,8 @@ if __name__ == "__main__":
     # target_folder = "F:\Pest\pest_data\Pest_Dataset_2023"
     # transfer_file_to_build_dataset(root_folder, target_folder)
     # stat_images_and_annotation(target_folder)
-
+    # separate_complementary_images("uk_pest_dataset_24DEC.yaml","uk_pest_dataset_25DEC.yaml", "F:\\pest_data\\Multitask_or_multimodality\\remove_rotato_from_exif\\0-5")
+    # copy_xml_annotation("F:\\pest_data\\Multitask_or_multimodality\\annotated_data","F:\\pest_data\\Multitask_or_multimodality\\remove_rotato_from_exif\\0-5")
     path = "F:\\Pest\\pest_data\\Builted_Dataset_In_2022\\Annotated_Data"
 
     # check_duplicate_image(path)
@@ -178,4 +348,14 @@ if __name__ == "__main__":
 
     # delete_duplicate_image(path)
 
-    modify_class("F:\\nematoda\\AgriNema\\Processed_image\\PCN_RLN_x5", "Pratylenchus")
+    # modify_class("F:\\nematoda\\AgriNema\\Processed_image\\PCN_RLN_x5", "Pratylenchus")
+
+    expert_folder = "F:\\pest_data\\Expert_annotated_image\\Annotated-20-Apr-2022"
+
+    hashed_folder = "F:\\pest_data\\Multitask_or_multimodality\\annotated_images"
+    target_folder = "F:\\pest_data\\Multitask_or_multimodality\\class_annotated_data"
+
+    # move_hashed_image_based_on_expert_annotation(expert_folder, hashed_folder, target_folder)
+
+    # remove_rotating_from_exif("F:\\pest_data\\Multitask_or_multimodality\\annotated_data","F:\\pest_data\\Multitask_or_multimodality\\annotated_data")
+    # remove_rorating_from_exif("F:\\pest_data\\Multitask_or_multimodality\\annotated_data","F:\\pest_data\\Multitask_or_multimodality\\annotated_data")

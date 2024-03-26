@@ -70,10 +70,10 @@ def prediction(model_path,image_path, conf=0.5, savepath=None):
             color = (255,0,255)
 
         # print(bounding_box[0],bounding_box[1],bounding_box[2],bounding_box[3])
-        img = cv2.rectangle(img, (int(bounding_box[0]),int(bounding_box[1])), (int(bounding_box[2]),int(bounding_box[3])),color,2)
+        img = cv2.rectangle(img, (int(bounding_box[0]),int(bounding_box[1])), (int(bounding_box[2]),int(bounding_box[3])),color,10)
 
         item_name = results[0].names[int(results[0].boxes.cpu().data[i][-1].item())]
-        img = cv2.putText(img, item_name, (int(bounding_box[0]),int(bounding_box[1])), cv2.FONT_HERSHEY_COMPLEX, 1, color, 2)
+        img = cv2.putText(img, item_name, (int(bounding_box[0]),int(bounding_box[1])), cv2.FONT_HERSHEY_COMPLEX, 1, color, 10)
 
         if item_name in result_static:
             result_static[item_name] += 1
@@ -82,10 +82,10 @@ def prediction(model_path,image_path, conf=0.5, savepath=None):
 
     # num = len(results[0].boxes.xyxy.cpu())
     # class_result = results[0].names[int(results[0].boxes.cpu().data[i][-1].item())]
-    img = cv2.putText(img, f"; ".join([f"{k}: {v}" for k,v in result_static.items()]), (10,100), cv2.FONT_HERSHEY_COMPLEX, 1.5, (64,224,208), 5)
+    img = cv2.putText(img, f"; ".join([f"{k}: {v}" for k,v in result_static.items()]), (10,100), cv2.FONT_HERSHEY_COMPLEX, 1.5, (64,224,208), 10)
     print(result_static)
     cv2.imshow("result", img)
-    # cv2.waitKey()
+    cv2.waitKey()
     img_name = ".".join(image_path.split("\\")[-1].split(".")[:-1]) 
 
     if savepath!=None:
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     # prediction_test()
     # prediction("runs\\detect\\train\\weights\\best.pt", "F:\\nematoda\\nemadote_detection\\images\\train\\img_5010_id246.jpg")
 
-    prediction("runs\\nematodes_medium_21_10\\weights\\best.torchscript", "F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_x5\\original_label\\Mixture_Image001_ch00.jpg")
+    # prediction("runs\\nematodes_medium_21_10\\weights\\best.torchscript", "F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_x5\\original_label\\Mixture_Image001_ch00.jpg")
 
     # pathes = [
     #     "F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_x10",
@@ -128,3 +128,5 @@ if __name__ == "__main__":
 
     # for path in pathes:
     #     draw_results_from_folder("runs\\nematodes_tiny_21_10\\weights\\best.pt", path)
+
+    prediction("runs\\uk_pest_01JAN_medium\\weights\\best.pt", "F:\\pest_data\\Multitask_or_multimodality\\VOCdevkit\\VOC2007\\JPEGImages\\0x1a1c1c3d7be27144.JPG")
