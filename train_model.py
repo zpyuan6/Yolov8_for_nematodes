@@ -6,11 +6,11 @@ import torch
 def training_original_yolo(dataset_yaml, folder_name):
     model_list = ["yolov8n.pt","yolov8m.pt","yolov8x.pt"]
 
-    # model_large = YOLO(model_list[0])
-    # model_large.train(data=dataset_yaml, epochs=200, imgsz=640, batch=16, name= f"{folder_name}_tiny")
+    model_large = YOLO(model_list[0])
+    model_large.train(data=dataset_yaml, epochs=200, imgsz=640, batch=16, name= f"{folder_name}_tiny")
 
-    # model_large = YOLO(model_list[1])
-    # model_large.train(data=dataset_yaml, epochs=200, imgsz=640, batch=16, name= f"{folder_name}_medium")
+    model_large = YOLO(model_list[1])
+    model_large.train(data=dataset_yaml, epochs=200, imgsz=640, batch=16, name= f"{folder_name}_medium")
 
     model_large = YOLO(model_list[2])
     model_large.train(data=dataset_yaml, epochs=200, imgsz=640, batch=2, name= f"{folder_name}_extra")
@@ -19,7 +19,7 @@ def training_original_yolo(dataset_yaml, folder_name):
 # Yolov8 DOCS https://docs.ultralytics.com/modes/train/
 if __name__ == "__main__":
 
-    training_original_yolo("uk_pest_dataset_01JAN.yaml","uk_pest_01JAN")
+    training_original_yolo("uk_pest_dataset_26MAR.yaml","uk_pest_26MAR")
 
     # model = YOLO("yolov8m.pt")
     # model.train(data="nematodes.yaml", epochs=100, imgsz=640)
@@ -39,27 +39,27 @@ if __name__ == "__main__":
     # model_large = YOLO(model_list[0])
     # model_large.train(data="microorganism.yaml", epochs=400, imgsz=512, batch=48, name= "microorganism_24_07")
 
-    model_list = [
-            "/home/zhipeng/Desktop/nematodes/Yolov8_for_nematodes/runs/detect/uk_pest_24DEC_tiny/weights/best.pt",
-            "yolov8m.pt",
-            "yolov8x.pt",
-            "/home/zhipeng/Desktop/nematodes/Yolov8_for_nematodes/runs/detect/uk_pest_29DEC_tiny/weights/best.pt",
-            "/home/zhipeng/Desktop/nematodes/Yolov8_for_nematodes/runs/detect/uk_pest_29DEC_medium/weights/best.pt",
-            "/home/zhipeng/Desktop/nematodes/Yolov8_for_nematodes/runs/detect/uk_pest_29DEC_extra/weights/best.pt"
-            ]
+#     model_list = [
+#             "/home/zhipeng/Desktop/nematodes/Yolov8_for_nematodes/runs/detect/uk_pest_24DEC_tiny/weights/best.pt",
+#             "yolov8m.pt",
+#             "yolov8x.pt",
+#             "/home/zhipeng/Desktop/nematodes/Yolov8_for_nematodes/runs/detect/uk_pest_29DEC_tiny/weights/best.pt",
+#             "/home/zhipeng/Desktop/nematodes/Yolov8_for_nematodes/runs/detect/uk_pest_29DEC_medium/weights/best.pt",
+#             "/home/zhipeng/Desktop/nematodes/Yolov8_for_nematodes/runs/detect/uk_pest_29DEC_extra/weights/best.pt"
+#             ]
 
-    model_large = YOLO(model_list[0])
-    model_large.train(data="uk_pest_dataset_24DEC.yaml", epochs=400, imgsz=512, batch=48, name= "uk_pest_24DEC_tiny")
-    model_large = YOLO(model_list[3])
-    model_large.train(data="uk_pest_dataset_01JAN.yaml", epochs=400, imgsz=512, batch=48, name= "uk_pest_01JAN_tiny")
+#     model_large = YOLO(model_list[0])
+#     model_large.train(data="uk_pest_dataset_24DEC.yaml", epochs=400, imgsz=512, batch=48, name= "uk_pest_24DEC_tiny")
+#     model_large = YOLO(model_list[3])
+#     model_large.train(data="uk_pest_dataset_01JAN.yaml", epochs=400, imgsz=512, batch=48, name= "uk_pest_01JAN_tiny")
 
-    model_large = YOLO(model_list[1])
-    model_large.train(data="uk_pest_dataset_24DEC.yaml", epochs=200, imgsz=640, batch=16, name= "uk_pest_24DEC_medium")
-    model_large = YOLO(model_list[4])
-    model_large.train(data="uk_pest_dataset_01JAN.yaml", epochs=200, imgsz=640, batch=16, name= "uk_pest_01JAN_medium")
+#     model_large = YOLO(model_list[1])
+#     model_large.train(data="uk_pest_dataset_24DEC.yaml", epochs=200, imgsz=640, batch=16, name= "uk_pest_24DEC_medium")
+#     model_large = YOLO(model_list[4])
+#     model_large.train(data="uk_pest_dataset_01JAN.yaml", epochs=200, imgsz=640, batch=16, name= "uk_pest_01JAN_medium")
 
 
-    model_large = YOLO(model_list[2])
-    model_large.train(data="uk_pest_dataset_24DEC.yaml", epochs=100, imgsz=640, batch=2, name= "uk_pest_24DEC_extra")
-    model_large = YOLO(model_list[5])
-    model_large.train(data="uk_pest_dataset_01JAN.yaml", epochs=100, imgsz=640, batch=2, name= "uk_pest_01JAN_extra")
+#     model_large = YOLO(model_list[2])
+#     model_large.train(data="uk_pest_dataset_24DEC.yaml", epochs=100, imgsz=640, batch=2, name= "uk_pest_24DEC_extra")
+#     model_large = YOLO(model_list[5])
+#     model_large.train(data="uk_pest_dataset_01JAN.yaml", epochs=100, imgsz=640, batch=2, name= "uk_pest_01JAN_extra")
