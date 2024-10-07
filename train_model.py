@@ -39,9 +39,9 @@ def parse_args():
 
 def train_model(yaml_path, models, epochs, img_size, batch_size):
 
-    for model in models:
-        model = YOLO(model)
-        model.train(data=yaml_path, epochs=epochs, imgsz=img_size, batch=batch_size, name=f"{model.split('.')[0]}_{img_size}_{yaml_path.split('.')[0]}")
+    for model_name in models:
+        model = YOLO(model_name)
+        model.train(data=yaml_path, epochs=epochs, imgsz=img_size, batch=batch_size, name=f"{model_name.split('.')[0]}_{img_size}_{yaml_path.split('.')[0]}")
 
 if __name__ == "__main__":
 
