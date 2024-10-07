@@ -8,6 +8,7 @@ from PIL import Image
 from skimage import io
 from build_annotation import SetAnnotation
 import numpy as np
+from random import sample
 
 CLASSES = ['pest', 'unknown', 'spider', 'fly', 'snail', 'aphid', 'slug', 'beetle', 'Pest', 'Fly', 'Beetle', 'snails', 'cabbage\\taphid']
 # CLASSES_MAP = [0,0,1,2,3,4,5,6,0,2,6,3,4]
@@ -48,27 +49,46 @@ def convert_annotation(annotation_file_path, list_file, classes_list:list, class
         print(img.shape)
 
     for obj in root.iter('object'):
-        cls = obj.find('name').text.upper()
+        class_name = obj.find('name').text.upper()
 
-        if "CHIRONOMID MIDGE" in cls:
-            cls = 'CHIRONOMID MIDGE'
+        # -----------All insecta start--------------
+        # if 'APHID' in class_name:
+        #     class_name = "GRAIN APHID (SITOBION AVENAE) or ROSE GRAIN APHID"
 
-        if "APHID" in cls: 
-            cls = "GRAIN APHID (SITOBION AVENAE)"
+        # if 'CHIRONOMID MIDGE' in class_name:
+        #     class_name = 'CHIRONOMID MIDGE'
 
-        if "FLY" in cls:
-            cls = "FLY (DIPTERA)"
+        # if class_name in ['FROGHOPPER (CERCOPIDAE)', 'SCARABAEIDAE']:
+        #     class_name = 'INSECTA'
+
+        # if class_name in ['FLY (MELANOSTOMA SPP.)', 'BIBIONID FLY (BIBIONIDAE)', 'MUSCIDAE (FLY)', 'LEAF MINERS', 'BEAN SEED FLY (DELIA SPP.)', 'FUNGUS GNAT (MYCETOPHILIDAE)']:
+        #     class_name = "FLY (DIPTERA)"
+        # -----------All insecta end----------------
+
+        # -----------Pest only start--------------
+        if 'APHID' in class_name:
+            class_name = "GRAIN APHID (SITOBION AVENAE) or ROSE GRAIN APHID"
+
+        if not class_name in classes_list:
+            class_name = "INSECTA (NOT CONCERNED)"
+        # -----------Pest only end----------------
+                    
+        if not class_name in classes_list:
+            print(class_name)
+            # cls = "INSECTA (NOT CONCERNED)"
+            # print(cls)
+            class_name = "INSECTA"
 
         if have_class_name_list:
-            print(cls, " ", annotation_file_path)
-            cls_id = classes_list.index(cls)
+            # print(cls, " ", annotation_file_path)
+            cls_id = classes_list.index(class_name)
             if cls_id in classes_dict:
                 classes_dict[cls_id] += 1
             else:
                 classes_dict[cls_id] = 1
         else:
-            if cls not in classes_list:
-                classes_list.append(cls)
+            if class_name not in classes_list:
+                classes_list.append(class_name)
                 cls_id = CLASSES_MAP[classes_list.index(cls)]
                 classes_dict[cls_id] = 1
             else:
@@ -111,6 +131,7 @@ def convert_xml_to_yolo(source_folder, target_folder, classes_name_list=None):
 
     classes_dict = {}
     classes_list = [] if classes_name_list==None else classes_name_list
+    sample_list_ordered_by_class = {}
 
     train_yolo_image_folder = os.path.join(target_folder, "images\\train")
     val_yolo_image_folder = os.path.join(target_folder, "images\\val")
@@ -123,28 +144,78 @@ def convert_xml_to_yolo(source_folder, target_folder, classes_name_list=None):
     check_and_create_folder(train_yolo_label_folder)
     check_and_create_folder(val_yolo_label_folder)
 
+
     for root, folders, files in os.walk(source_folder):
         for file in files:
             file_name,file_type = os.path.splitext(file)
             if not (file_type == ".xml" or file_type == ".txt"):
-                ro = random.random()
-                if ro < train_val:
-                    # if file_type == ".JPG":
-                    #     shutil.copy(os.path.join(root,file),os.path.join(train_yolo_image_folder,file_name+".jpg"))
-                    # else:
+                voc_annotation_file = open(os.path.join(root,file_name+".xml"), encoding='utf-8')
+                tree = ET.parse(voc_annotation_file)
+                r = tree.getroot()
+                temp_list = set([])
+                for obj in r.iter('object'):
+                    class_name = obj.find('name').text
+                    # -----------All insecta start--------------
+                    # if 'APHID' in class_name:
+                    #     class_name = "GRAIN APHID (SITOBION AVENAE) or ROSE GRAIN APHID"
+
+                    # if 'CHIRONOMID MIDGE' in class_name:
+                    #     class_name = 'CHIRONOMID MIDGE'
+
+                    # if class_name in ['FROGHOPPER (CERCOPIDAE)', 'SCARABAEIDAE']:
+                    #     class_name = 'INSECTA'
+
+                    # if class_name in ['FLY (MELANOSTOMA SPP.)', 'BIBIONID FLY (BIBIONIDAE)', 'MUSCIDAE (FLY)', 'LEAF MINERS', 'BEAN SEED FLY (DELIA SPP.)', 'FUNGUS GNAT (MYCETOPHILIDAE)']:
+                    #     class_name = "FLY (DIPTERA)"
+                    # -----------All insecta end----------------
+
+                    # -----------Pest only start--------------
+                    if 'APHID' in class_name:
+                        class_name = "GRAIN APHID (SITOBION AVENAE) or ROSE GRAIN APHID"
+
+                    if not class_name in classes_list:
+                        class_name = "INSECTA (NOT CONCERNED)"
+                    # -----------Pest only end----------------
+                    
+                    # if not class_name in classes_list:
+                    #     class_name = "INSECTA (NOT CONCERNED)"
+                        # print(class_name)
+                        # class_name = "INSECTA"
+
+                    temp_list.add(class_name)
+                for c in temp_list:
+                    if c in sample_list_ordered_by_class:
+                        sample_list_ordered_by_class[c].append(file)
+                    else:
+                        sample_list_ordered_by_class[c] = [file]
+
+    sample_list_ordered_by_class = dict(sorted(sample_list_ordered_by_class.items(), key=lambda item: len(item[1])))
+    val_image_list = set([])
+    train_image_list = set([])
+    for c in sample_list_ordered_by_class.keys():
+        # print(len(sample_list_ordered_by_class[c]))
+        val_list = sample(sample_list_ordered_by_class[c], int(max(1, len(sample_list_ordered_by_class[c])*(1-train_val))))
+        train_list = set(sample_list_ordered_by_class[c])-set(val_list)
+        val_image_list = val_image_list.union(val_list)
+        train_image_list = train_image_list.union(train_list)
+        # print(len(val_list),len(train_list),len(val_image_list),len(train_image_list))
+
+
+    for root, folders, files in os.walk(source_folder):
+        for file in files:
+            file_name,file_type = os.path.splitext(file)
+            if not (file_type == ".xml" or file_type == ".txt"):
+                if file in train_image_list:
                     shutil.copy(os.path.join(root,file),os.path.join(train_yolo_image_folder,file))
 
                     annotation_file = open(os.path.join(train_yolo_label_folder,file_name+".txt"), 'w', encoding='utf-8')
-
+                    
                     convert_annotation(os.path.join(root,file_name+".xml"), annotation_file, classes_list, classes_dict, os.path.join(root,file))
 
                     annotation_file.write('\n')
 
                     annotation_file.close()
                 else:
-                    # if file_type == ".JPG":
-                    #     shutil.copy(os.path.join(root,file),os.path.join(val_yolo_image_folder,file_name+".jpg"))
-                    # else:
                     shutil.copy(os.path.join(root,file),os.path.join(val_yolo_image_folder,file))
 
                     annotation_file = open(os.path.join(val_yolo_label_folder,file_name+".txt"), 'w', encoding='utf-8')
@@ -154,6 +225,35 @@ def convert_xml_to_yolo(source_folder, target_folder, classes_name_list=None):
                     annotation_file.write('\n')
 
                     annotation_file.close()
+
+
+    #             ro = random.random()
+    #             if ro < train_val:
+    #                 # if file_type == ".JPG":
+    #                 #     shutil.copy(os.path.join(root,file),os.path.join(train_yolo_image_folder,file_name+".jpg"))
+    #                 # else:
+    #                 shutil.copy(os.path.join(root,file),os.path.join(train_yolo_image_folder,file))
+
+    #                 annotation_file = open(os.path.join(train_yolo_label_folder,file_name+".txt"), 'w', encoding='utf-8')
+
+    #                 convert_annotation(os.path.join(root,file_name+".xml"), annotation_file, classes_list, classes_dict, os.path.join(root,file))
+
+    #                 annotation_file.write('\n')
+
+    #                 annotation_file.close()
+    #             else:
+    #                 # if file_type == ".JPG":
+    #                 #     shutil.copy(os.path.join(root,file),os.path.join(val_yolo_image_folder,file_name+".jpg"))
+    #                 # else:
+    #                 shutil.copy(os.path.join(root,file),os.path.join(val_yolo_image_folder,file))
+
+    #                 annotation_file = open(os.path.join(val_yolo_label_folder,file_name+".txt"), 'w', encoding='utf-8')
+
+    #                 convert_annotation(os.path.join(root,file_name+".xml"), annotation_file, classes_list, classes_dict, os.path.join(root,file))
+
+    #                 annotation_file.write('\n')
+
+    #                 annotation_file.close()
 
     print(classes_list, classes_dict)
     
@@ -225,6 +325,7 @@ def copy_annotation(yolo_folder,voc_folder):
             source_annotation_file = os.path.join(annotation_folder, f"{image_id}.txt")
             target_annotation_file = os.path.join(val_labels, f"{image_id}.txt")
             shutil.copy(source_annotation_file, target_annotation_file)
+
 
 
 def present_annotation(image_path, annotation_path):
@@ -318,7 +419,9 @@ def copy_from_yolo(orign_yolo_folder,img_anno_folder,target_folder):
 if __name__ == "__main__":
     org_path = "F:\\pest_data\\Multitask_or_multimodality\\annotated_data"
     # org_path = "F:\\pest_data\\Multitask_or_multimodality\\temp"
-    yolo_path = "F:\\pest_data\\Multitask_or_multimodality\\YOLO_26MAR"
+    # yolo_path = "F:\\pest_data\\Multitask_or_multimodality\\YOLO_18SEP24_ALL_INSECTA"
+    yolo_path = "F:\\pest_data\\Multitask_or_multimodality\\YOLO_18SEP24_PEST_ONLY"
+    # yolo_path = "F:\\pest_data\\Multitask_or_multimodality\\YOLO_18SEP24_ONLY_PEST_NO_FLY"
 
     # org_path = "F:\\nematoda\\AgriNema\\original_annotated_data"
     # yolo_path = "F:\\nematoda\\AgriNema\\Formated_Dataset\\Yolo_11Dec"
@@ -327,33 +430,59 @@ if __name__ == "__main__":
     # copy_annotation(yolo_path, voc_path)
     # convert_xml_to_yolo(org_path, yolo_path)
 
-    classes_name_list = [
-        "INSECTA",
-        "GRAIN APHID (SITOBION AVENAE)",  # 2.	'GRAIN APHID (SITOBION AVENAE)'; 'ROSE GRAIN APHID'
+    classes_name_list_for_only_pest = [
+        "INSECTA (NOT CONCERNED)",
+        "GRAIN APHID (SITOBION AVENAE) or ROSE GRAIN APHID",
         "POLLEN BEETLE (MELIGETHES SPP.)",
-        "SNAIL", 
+        "SNAIL",
         "CEREAL LEAF BEETLE (OULEMA MELANOPUS)",
-        "FLY (DIPTERA)", # 6.	'FLY (DIPTERA)'; 'BEAN SEED FLY (DELIA SPP.)'; 'FLY (MELANOSTOMA SPP.)'; ‘BIBIONID FLY (BIBIONIDAE)'; 'MUSCIDAE (FLY)'
         "CABBAGE STEM FLEA BETTLE",
-        "LADYBUG (COCCINELLIDAE)",
-        "LADYBUG (COCCINELLIDAE) (PUPA)",
-        "LADYBUG (COCCINELLIDAE) (LARVAE)",
-        "SPIDER (ARANEUS SPP.)",
-        "CHIRONOMID MIDGE", # 12.	'CHIRONOMID MIDGE'; 'CHIRONOMID MIDGE (MALE)'
-        "BEETLE (COLEOPTERA)",
-        "MOSQUITO",
-        "WASP",
         "SLUG",
         "CABBAGE WHITEFLY",
-        "FROGHOPPER (CERCOPIDAE)",
-        "FUNGUS GNAT (MYCETOPHILIDAE)",
-        "HEMIPTERA (PLANT BUG)",
-        "EARTHWORM",
         "LEAF MINERS",
-        "SCARABAEIDAE",
-        "GROUND BETTLE (HARPALUS SPP)"
+        "BEAN SEED FLY (DELIA SPP.)"
     ]
-    convert_xml_to_yolo(org_path, yolo_path,classes_name_list)
+
+    classes_name_list_for_only_pest_no_fly = [
+        "INSECTA (NOT CONCERNED)",
+        "GRAIN APHID (SITOBION AVENAE) or ROSE GRAIN APHID",
+        "POLLEN BEETLE (MELIGETHES SPP.)",
+        "SNAIL",
+        "CEREAL LEAF BEETLE (OULEMA MELANOPUS)",
+        "CABBAGE STEM FLEA BETTLE",
+        "SLUG",
+        "CABBAGE WHITEFLY"
+    ]
+
+    classes_name_list_for_all_insecta = [
+        "INSECTA", # 'INSECTA': 834, 'FROGHOPPER (CERCOPIDAE)': 1, 'SCARABAEIDAE': 1
+        "GRAIN APHID (SITOBION AVENAE) or ROSE GRAIN APHID", # 'GRAIN APHID (SITOBION AVENAE)', 'ROSE GRAIN APHID': 130+1, 
+        "POLLEN BEETLE (MELIGETHES SPP.)", # 'POLLEN BEETLE (MELIGETHES SPP.)': 2843, 
+        "SNAIL", # 'SNAIL': 50, 
+        "CEREAL LEAF BEETLE (OULEMA MELANOPUS)", # 'CEREAL LEAF BEETLE (OULEMA MELANOPUS)': 66, 
+        "FLY (DIPTERA)", # 'FLY (DIPTERA)': 1210, 'FLY (MELANOSTOMA SPP.)': 14, 'BIBIONID FLY (BIBIONIDAE)': 41, 'MUSCIDAE (FLY)': 4, 'LEAF MINERS': 2, 'BEAN SEED FLY (DELIA SPP.)': 49, 'FUNGUS GNAT (MYCETOPHILIDAE)': 8, 
+        "CABBAGE STEM FLEA BETTLE", #'CABBAGE STEM FLEA BETTLE': 123, 
+        "LADYBUG (COCCINELLIDAE)", #'LADYBUG (COCCINELLIDAE)': 198, 
+        "LADYBUG (COCCINELLIDAE) (PUPA)", #'LADYBUG (COCCINELLIDAE) (PUPA)': 166, 
+        "LADYBUG (COCCINELLIDAE) (LARVAE)", #'LADYBUG (COCCINELLIDAE) (LARVAE)': 10, 
+        "SPIDER (ARANEUS SPP.)", #'SPIDER (ARANEUS SPP.)': 73, 
+        "CHIRONOMID MIDGE", #'CHIRONOMID MIDGE': 93, 'CHIRONOMID MIDGE (MALE)': 4,
+        "BEETLE (COLEOPTERA)", #'BEETLE (COLEOPTERA)': 176, 
+        "MOSQUITO", # 'MOSQUITO': 77,
+        "WASP", #'WASP': 36, 
+        "SLUG", #'SLUG': 67, 
+        "CABBAGE WHITEFLY", #'CABBAGE WHITEFLY': 13,
+        "BEE", # 'BEE': 35,  
+        "HEMIPTERA (PLANT BUG)", #'HEMIPTERA (PLANT BUG)': 4,
+        "EARTHWORM", #'EARTHWORM': 7, 
+        "BUMBLEBEE", # 'BUMBLEBEE': 70, 
+        "GROUND BETTLE (HARPALUS SPP)", #'GROUND BETTLE (HARPALUS SPP)': 18, 
+        "ANT", #'ANT': 10, 
+        "PYRRHOCORIDAE", #'PYRRHOCORIDAE': 7, 
+        "LONGICORN" #'LONGICORN': 5
+    ]
+
+    convert_xml_to_yolo(org_path, yolo_path, classes_name_list_for_only_pest_no_fly)
 
     # copy_from_yolo("F:\\pest_data\Multitask_or_multimodality\\YOLO_24Dec", "F:\\pest_data\\Multitask_or_multimodality\\annotated_data", "F:\\pest_data\\Multitask_or_multimodality\\temp")
 

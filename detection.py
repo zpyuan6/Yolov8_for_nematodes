@@ -3,7 +3,7 @@ import cv2
 import time
 import os
 
-classification = ["Meloidogyne", "Cyst", "Globodera", "Pratylenchus", "PCN j2", "Ditylenchus"]
+# classification = ["Meloidogyne", "Cyst", "Globodera", "Pratylenchus", "PCN j2", "Ditylenchus"]
 
 
 
@@ -68,6 +68,8 @@ def prediction(model_path,image_path, conf=0.5, savepath=None):
             color = (255,255,0)
         elif results[0].boxes.cls.cpu().numpy()[i]==5:
             color = (255,0,255)
+        else:
+            color = (255,0,255)
 
         # print(bounding_box[0],bounding_box[1],bounding_box[2],bounding_box[3])
         img = cv2.rectangle(img, (int(bounding_box[0]),int(bounding_box[1])), (int(bounding_box[2]),int(bounding_box[3])),color,10)
@@ -88,10 +90,10 @@ def prediction(model_path,image_path, conf=0.5, savepath=None):
     cv2.waitKey()
     img_name = ".".join(image_path.split("\\")[-1].split(".")[:-1]) 
 
-    if savepath!=None:
-        cv2.imwrite(savepath,img)
-    else:
-        cv2.imwrite(f"{img_name}_result.png",img)
+    # if savepath!=None:
+    #     cv2.imwrite(savepath,img)
+    # else:
+    #     cv2.imwrite(f"{img_name}_result.png",img)
 
 def is_image_file(file_name):
     if file_name.split(".")[-1] == "JPG" or file_name.split(".")[-1] == "jpg" or file_name.split(".")[-1] == "JPEG" or file_name.split(".")[-1] == "tif":
@@ -109,6 +111,7 @@ def draw_results_from_folder(model_path, folder_path):
         for file in files:
             if is_image_file(file):
                 prediction(model_path, os.path.join(root, file), 0.585, os.path.join(save_path,file))
+                
 
 
 # Yolov8 DOCS https://docs.ultralytics.com/modes/predict/
@@ -129,4 +132,5 @@ if __name__ == "__main__":
     # for path in pathes:
     #     draw_results_from_folder("runs\\nematodes_tiny_21_10\\weights\\best.pt", path)
 
-    prediction("runs\\uk_pest_01JAN_medium\\weights\\best.pt", "F:\\pest_data\\Multitask_or_multimodality\\VOCdevkit\\VOC2007\\JPEGImages\\0x1a1c1c3d7be27144.JPG")
+
+    prediction("runs\\uk_pest_01JAN_tiny\\weights\\best.pt", "F:\\pest_data\\Multitask_or_multimodality\\YOLO_01JAN\\images\\train\\0x427f6f23741b9e8f.JPG")

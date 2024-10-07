@@ -14,15 +14,34 @@ def rename_object(path):
                 objects = root.findall('object')
 
                 for obj in objects:
-                    if obj.find('name').text == 'FROGHOPPERS (CERCOPIDAE)':
-                        obj.find('name').text = 'FROGHOPPER (CERCOPIDAE)'.upper()
-
                     if obj.find('name').text == 'LADYBUG (COCCINELLIDAE) (LARVEA)':
                         obj.find('name').text = 'LADYBUG (COCCINELLIDAE) (LARVAE)'.upper()
+
+                    if obj.find('name').text == 'GROUND BETTLE(HARPALUS SPP)':
+                        obj.find('name').text = 'GROUND BETTLE (HARPALUS SPP)'.upper()
+
+                    if obj.find('name').text == 'SPIDER':
+                        obj.find('name').text = 'SPIDER (ARANEUS SPP.)'.upper()
+
+                    # if obj.find('name').text == 'FLY':
+                    #     obj.find('name').text = 'FLY (DIPTERA)'.upper()
+
+                    # if obj.find('name').text == 'POLLEN BEETLE':
+                    #     obj.find('name').text = 'POLLEN BEETLE (MELIGETHES SPP.)'.upper()
+
+                    # if obj.find('name').text == 'POLLEN BEETLE':
+                    #     obj.find('name').text = 'POLLEN BEETLE (MELIGETHES SPP.)'.upper()
 
                         # print(obj.find('name').text)
                     if not obj.find('name').text in name_list:
                         name_list.append(obj.find('name').text)
+
+                    bnd = obj.find('bndbox')
+
+                    bnd.find('xmin').text = f"{int(float(bnd.find('xmin').text)) }"
+                    bnd.find('ymin').text = f"{int(float(bnd.find('ymin').text))}"
+                    bnd.find('xmax').text = f"{int(float(bnd.find('xmax').text))}"
+                    bnd.find('ymax').text = f"{int(float(bnd.find('ymax').text))}"
 
                 tree.write(annotation_file)
     
@@ -74,11 +93,23 @@ def move_one_classes_file(path, target_folder, target_classes):
                 shutil.copy2(os.path.join(r,file), os.path.join(target_folder,file))
 
 
+def move_manual_checked_data(source_path, target_path):
+
+    for r, folders, files in os.walk(source_path):
+        for file in files:
+            if file.split(".")[-1] == "JPG":
+                new_file_name = "-".join([r.split("\\")[-1], file.split(".")[0]])
+                shutil.copy2(os.path.join(r, file), os.path.join(target_path, new_file_name+".JPG"))
+                shutil.copy2(os.path.join(r, ".".join(file.split(".")[0:-1])+".xml"), os.path.join(target_path, new_file_name+".xml"))
+
 
 if __name__=="__main__":
     path = "F:\\pest_data\\Multitask_or_multimodality\\annotated_data"
-    rename_object(path)
-
     # list_object_name(path)
+    rename_object(path)
+    # ['LADYBUG (COCCINELLIDAE)', 'POLLEN BEETLE (MELIGETHES SPP.)', 'BEETLE (COLEOPTERA)', 'INSECTA', 'FLY (DIPTERA)', 'BEETLE', 'FLY', 'GROUND BETTLE (HARPALUS SPP)', 'SPIDER', 'LADYBUG', 'APHID', 'CEREAL LEAF BEETLE (OULEMA MELANOPUS)']
+    
 
     # move_one_classes_file(path, "F:\\pest_data\\Multitask_or_multimodality\\temp_data", ['INSECTA'])
+
+    # move_manual_checked_data(path, "F:\\pest_data\\Multitask_or_multimodality\\annotated_video")

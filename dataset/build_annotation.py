@@ -7,7 +7,9 @@ from os.path import join
 import copy
 import torch
 from ultralytics import YOLO
-
+import shutil
+from PIL import Image, ExifTags
+import cv2
 
 # ['Meloidogyne hapla', 'Globodera pallida', 'Pratylenchus', 'Ditylenchus']
 
@@ -78,21 +80,115 @@ class SetAnnotation():
         tree.write(out_file,encoding='utf-8')
 
 
+def create_folder(path):
+    for i in range(18):
+        os.makedirs(os.path.join(path,str(i)))
+    
+
+def move_images(folder_path, image_path):
+
+    folder_index = 0
+    image_index = 0
+    for root, folders, files in os.walk(image_path):
+        for file in files:
+            if image_index == 199:
+                image_index = 0
+                folder_index += 1
+            shutil.move(os.path.join(root,file), os.path.join(folder_path, str(folder_index), file))
+            image_index+=1
+
+def remove_rotato_exif(image_path):
+
+    for root,folders, files in os.walk(image_path):
+        for file in files:
+            if file.split(".")[-1]=="JPG" or file.split(".")[-1] == "jpg" or file.split(".")[-1] == "JPEG" or file.split(".")[-1] == "jpeg" or file.split(".")[-1] == "tif":
+                image = Image.open(os.path.join(root,file))
+
+                for orientation in ExifTags.TAGS.keys():
+                    if ExifTags.TAGS[orientation]=='Orientation':
+                        break
+                
+                exif = image.getexif()
+                if orientation in exif:
+                    if exif[orientation] != 0:
+                        print(file,exif[orientation])
+                    exif[orientation] = 0
+                    image.save(os.path.join(root,file), exif = exif)
+                else:
+                    print(f"Can not found orientation {file}")
+
+                image.close()
+
+
+def create_annotation_for_image(image_path):
+    pass
+
+def create_annotation_for_video(video_path, model:YOLO, class_list):
+    
+    for root,folders, files in os.walk(video_path):
+        for file in files:
+            if file.split(".")[-1]=="mp4":
+                cap = cv2.VideoCapture(os.path.join(root,file))
+                frame_index = 0
+                while True:
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+                    pred = model(frame, conf=0.585)
+                    setANN = SetAnnotation("F:\\pest_data\\Multitask_or_multimodality\\VOCdevkit\\VOC2007\\Annotations\\0x0.xml",os.path.join(root,file), root, class_list)
+                    setANN(f"{frame_index}", [frame.shape[1],frame.shape[0]],pred[0].boxes.data.cpu().numpy())
+                    frame_index+=1
+                cap.release()
+
+    pass
+
 
 if  __name__ == '__main__':
-    path = "F:\\pest_data\\Multitask_or_multimodality\\unannotated_images"
-    model_path = "runs\\pest_uk_medium_07_062\\weights\\best.pt"
+    path = "F:\\pest_data\\unannotated\\2024\\Image_From_Video_0.35"
+    model_path = "runs\\uk_pest_26MAR_medium\\weights\\best.pt"
     # class_list = ["Meloidogyne", "Cyst", "Globodera", "Pratylenchus", "PCN j2", "Ditylenchus"]
-    class_list = ["Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta"]
+    # class_list = ["Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta", "Insecta"]
+
+    class_list = [
+        "INSECTA",
+        "GRAIN APHID (SITOBION AVENAE)",
+        "POLLEN BEETLE (MELIGETHES SPP.)",
+        "SNAIL",
+        "CEREAL LEAF BEETLE (OULEMA MELANOPUS)",
+        "FLY (DIPTERA)",
+        "CABBAGE STEM FLEA BETTLE",
+        "LADYBUG (COCCINELLIDAE)",
+        "LADYBUG (COCCINELLIDAE) (PUPA)",
+        "LADYBUG (COCCINELLIDAE) (LARVEA)",
+        "SPIDER (ARANEUS SPP.)",
+        "CHIRONOMID MIDGE",
+        "BEETLE (COLEOPTERA)",
+        "MOSQUITO",
+        "WASP",
+        "SLUG",
+        "CABBAGE WHITEFLY", 
+        "FUNGUS GNAT (MYCETOPHILIDAE)",
+        "HEMIPTERA (PLANT BUG)",
+        "EARTHWORM",
+        "LEAF MINERS",
+        "SCARABAEIDAE",
+        "GROUND BETTLE (HARPALUS SPP)"
+    ]
 
     model = YOLO(model_path)
 
     for root, folders, files in os.walk(path):
-        if root!=path:
-            break
+        # if root!=path:
+        #     break
         for file in files:
-            if file.split(".")[-1] == "JPG" or file.split(".")[-1] == "jpg" or file.split(".")[-1] == "JPEG" or file.split(".")[-1] == "tif":
-                setANN = SetAnnotation("F:\\pest_data\\Multitask_or_multimodality\\annotated_images\\0x1a37ffe63075ee0.xml",os.path.join(root,file), root, class_list)
+            if file.split(".")[-1] == "JPG" or file.split(".")[-1] == "jpg" or file.split(".")[-1] == "JPEG" or file.split(".")[-1] == "jpeg" or file.split(".")[-1] == "tif":
+                setANN = SetAnnotation("F:\\pest_data\\Multitask_or_multimodality\\VOCdevkit\\VOC2007\\Annotations\\0x0.xml",os.path.join(root,file), root, class_list)
                 pred = model(os.path.join(root,file), conf=0.585)
                 # print(pred[0])
                 setANN('.'.join(file.split('.')[0:-1]), [pred[0].orig_shape[1],pred[0].orig_shape[0]],pred[0].boxes.data.cpu().numpy())
+
+    # folder_path = "F:\\pest_data\\unannotated\\2024"
+
+    # create_folder(folder_path)
+    # move_images(folder_path, path)
+    # remove_rotato_exif(path)

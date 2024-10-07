@@ -12,8 +12,8 @@ def test_inference():
         # net.load_model("runs\\uk_pest_01JAN_tiny\\weights\\best_ncnn_model\\model.ncnn.bin")
         # net.load_param("D:\\android\\PestMobi\\app\\src\\main\\assets\\yolov8n.param")
         # net.load_model("D:\\android\\PestMobi\\app\\src\\main\\assets\\yolov8n.bin")
-        net.load_param("C:\\Users\\zhipeng\\Desktop\\new\\best-sim-opt-fp16.param")
-        net.load_model("C:\\Users\\zhipeng\\Desktop\\new\\best-sim-opt-fp16.bin")
+        net.load_param("C:\\Users\\zhipeng\\Desktop\\nema_detect.param")
+        net.load_model("C:\\Users\\zhipeng\\Desktop\\nema_detect.bin")
 
 
         with net.create_extractor() as ex:

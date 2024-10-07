@@ -1,6 +1,8 @@
 runs/*
 val/*
 
+*.mp4
+
 *.pt
 
 *.jpg
