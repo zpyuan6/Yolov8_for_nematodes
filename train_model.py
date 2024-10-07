@@ -25,13 +25,10 @@ def training_yolov10(dataset_yaml):
     model_medium = YOLO(model_list[1])
     model_medium.train(data=dataset_yaml, epochs=200, imgsz=640, batch=4, name= f"{dataset_yaml.split('.')[0]}_{model_list[0].split('.')[0]}_640")
 
-# Yolov8 DOCS https://docs.ultralytics.com/modes/train/
+
 if __name__ == "__main__":
 
 
-    # training_original_yolo("uk_pest_dataset_18SEP24_all_insect.yaml","YOLOv8_640_18SEP24_all_insect")
-
-    # training_original_yolo("uk_pest_dataset_18SEP24_pest_only.yaml","YOLOv8_640_18SEP24_pest_only")
 
     training_yolov10("uk_pest_dataset_18SEP24_all_insect.yaml")
 
