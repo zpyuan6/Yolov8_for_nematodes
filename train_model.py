@@ -28,11 +28,13 @@ def training_yolov10(dataset_yaml):
 # Yolov8 DOCS https://docs.ultralytics.com/modes/train/
 if __name__ == "__main__":
 
+
     # training_original_yolo("uk_pest_dataset_18SEP24_all_insect.yaml","YOLOv8_640_18SEP24_all_insect")
 
     # training_original_yolo("uk_pest_dataset_18SEP24_pest_only.yaml","YOLOv8_640_18SEP24_pest_only")
 
     training_yolov10("uk_pest_dataset_18SEP24_all_insect.yaml")
+
 
     # model = YOLO("yolov8m.pt")
     # model.train(data="nematodes.yaml", epochs=100, imgsz=640)
