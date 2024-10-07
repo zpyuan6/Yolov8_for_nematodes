@@ -47,6 +47,6 @@ if __name__ == "__main__":
 
     args = parse_args()
 
-    training_yolov10("uk_pest_dataset_18SEP24_all_insect.yaml")
+    # training_yolov10("uk_pest_dataset_18SEP24_all_insect.yaml")
 
     train_model(args)
