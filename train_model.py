@@ -49,4 +49,9 @@ if __name__ == "__main__":
 
     # training_yolov10("uk_pest_dataset_18SEP24_all_insect.yaml")
 
-    train_model(args)
+    train_model(
+        yaml_path=args.yaml_path, 
+        models=args.models, 
+        epochs=args.epochs, 
+        img_size=args.img_size, 
+        batch_size=args.batch_size)
