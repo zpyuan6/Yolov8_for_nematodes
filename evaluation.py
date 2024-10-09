@@ -58,21 +58,19 @@ def evaluation_by_sourcecode(model_name, dataset_yaml_name):
     model = YOLO(f"runs\\detect\\{model_name}\\weights\\best.pt")
 
     # metrics = model.val("nematodes_test.yaml",save_json=True)
-    metrics = model.val(f"{dataset_yaml_name}.yaml",save_json=True, name=f"{model_name}_val_on_{dataset_yaml_name}")
+    metrics = model.val(data=f"{dataset_yaml_name}.yaml",save_json=True, name=f"{model_name}_val_on_{dataset_yaml_name}")
 
     # model.val("nematodes.yaml", save_json=True, save_dir="val")
 
-    print(metrics)
-
     print(metrics.box.map)
 
-    print(metrics.box.p)
+    # print(metrics.box.p)
 
-    print(metrics.box.r)
+    # print(metrics.box.r)
 
-    print(metrics.box.f1)
+    # print(metrics.box.f1)
 
-    print(metrics.box.ap50, np.mean(metrics.box.ap50))
+    # print(metrics.box.ap50, np.mean(metrics.box.ap50))
 
 if __name__ == "__main__":
     model_path = "runs\\detect\\uk_pest_24Dec_tiny\\weights\\best.pt"
@@ -80,8 +78,8 @@ if __name__ == "__main__":
     # model_path = "runs\\detect\\train\\weights\\last.pt"
     # dataset_dir = "F:\\nematoda\\nemadote_detection"
     # model_name = ["uk_pest_24Dec_tiny","uk_pest_24DEC_tiny2","uk_pest_24Dec_medium","uk_pest_24DEC_medium2","uk_pest_24Dec_extra","uk_pest_24DEC_extra2","uk_pest_25DEC_extra","uk_pest_25DEC_medium"]
-    model_name = ["uk_pest_25DEC_tiny","uk_pest_25DEC_extra","uk_pest_25DEC_medium"]
-    dataset_yaml_name = ["uk_pest_dataset_25DEC", "uk_pest_dataset_24DEC"]
+    model_name = ["YOLOv8_640_18SEP24_all_insect_tiny","YOLOv8_640_18SEP24_all_insect_medium","YOLOv8_640_18SEP24_all_insect_extra"]
+    dataset_yaml_name = ["uk_pest_dataset_18SEP24_all_insect_x1.25", "uk_pest_dataset_18SEP24_all_insect_x1.5", "uk_pest_dataset_18SEP24_all_insect_x1.75"]
 
     for model in model_name:
         for dataset in dataset_yaml_name:
