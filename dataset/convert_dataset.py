@@ -416,6 +416,60 @@ def copy_from_yolo(orign_yolo_folder,img_anno_folder,target_folder):
                     shutil.copy2(os.path.join(img_anno_folder, f"{img_id}.JPG"),os.path.join(target_folder, f"{img_id}.JPG"))
                     shutil.copy2(os.path.join(img_anno_folder, f"{img_id}.xml"),os.path.join(target_folder, f"{img_id}.xml"))
 
+def modify_class_label_to_one_class(yolo_folder):
+    train_path = os.path.join(yolo_folder, "labels", "train")
+    val_path = os.path.join(yolo_folder, "labels", "val")
+
+    target_train = os.path.join(yolo_folder, "labels", "train_one_class")
+    os.makedirs(target_train, exist_ok=True)
+    target_val = os.path.join(yolo_folder, "labels", "val_one_class")
+    os.makedirs(target_val, exist_ok=True)
+
+    for file_name in os.listdir(train_path):
+        if file_name.endswith(".txt"):
+            input_file_path = os.path.join(train_path, file_name)
+            output_file_path = os.path.join(target_train, file_name)
+
+            # 读取原始YOLO注释文件
+            with open(input_file_path, 'r') as f:
+                lines = f.readlines()
+
+            # 修改类标签为0
+            new_lines = []
+            for line in lines:
+                parts = line.strip().split()
+                if len(parts) <= 1:
+                    continue   
+
+                parts[0] = '0'  # 修改类标签为0
+                new_lines.append(' '.join(parts))
+
+            # 将修改后的注释保存到新的文件夹
+            with open(output_file_path, 'w') as f:
+                f.write('\n'.join(new_lines))
+
+    for file_name in os.listdir(val_path):
+        if file_name.endswith(".txt"):
+            input_file_path = os.path.join(val_path, file_name)
+            output_file_path = os.path.join(target_val, file_name)
+
+            # 读取原始YOLO注释文件
+            with open(input_file_path, 'r') as f:
+                lines = f.readlines()
+
+            # 修改类标签为0
+            new_lines = []
+            for line in lines:
+                parts = line.strip().split()
+                if len(parts) <= 1:
+                    continue   
+                parts[0] = '0'  # 修改类标签为0
+                new_lines.append(' '.join(parts))
+
+            # 将修改后的注释保存到新的文件夹
+            with open(output_file_path, 'w') as f:
+                f.write('\n'.join(new_lines))
+
 if __name__ == "__main__":
     org_path = "F:\\pest_data\\Multitask_or_multimodality\\annotated_data"
     # org_path = "F:\\pest_data\\Multitask_or_multimodality\\temp"
@@ -428,7 +482,7 @@ if __name__ == "__main__":
     # voc_path = "F:\\nematoda\\Microorganism\\Dataset"
     # yolo_path = "F:\\nematoda\\Microorganism\\YOLO"
     # copy_annotation(yolo_path, voc_path)
-    # convert_xml_to_yolo(org_path, yolo_path)
+    convert_xml_to_yolo(org_path, yolo_path)
 
     classes_name_list_for_only_pest = [
         "INSECTA (NOT CONCERNED)",
@@ -482,7 +536,7 @@ if __name__ == "__main__":
         "LONGICORN" #'LONGICORN': 5
     ]
 
-    convert_xml_to_yolo(org_path, yolo_path, classes_name_list_for_only_pest_no_fly)
+    # convert_xml_to_yolo(org_path, yolo_path, classes_name_list_for_only_pest_no_fly)
 
     # copy_from_yolo("F:\\pest_data\Multitask_or_multimodality\\YOLO_24Dec", "F:\\pest_data\\Multitask_or_multimodality\\annotated_data", "F:\\pest_data\\Multitask_or_multimodality\\temp")
 
@@ -495,3 +549,5 @@ if __name__ == "__main__":
     # val_list = []
 
     # rename_file("F:\\nematoda\\AgriNema\\unannotated_data\\PCN_RLN_JPEG_unfinished\\Original_annotation","pcn_rln_x5")
+
+    # modify_class_label_to_one_class("X:\\pervasive_group\\PestProject\\Dataset\\YOLO_18SEP24_ALL_INSECTA")

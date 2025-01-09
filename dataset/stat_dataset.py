@@ -3,6 +3,9 @@ import shutil
 import xml.etree.ElementTree as ET
 import numpy as np
 from scipy import stats
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def image_number(path):
     num = 0
@@ -200,9 +203,57 @@ def statistic_object_size(yolo_dataset_path):
         #     "confidence_interval": confidence_interval
         # }
 
+    print(stats_info)
+
+def draw_object_size_distribution(yolo_dataset_path):
+    class_area_ratios = []
+
+    for root, folders, files in os.walk(yolo_dataset_path):
+        for file in files:
+            if file.split(".")[-1] == "txt":
+                f = open(os.path.join(root,file),"r")
+                lines = f.readlines()
+                for line in lines:
+                    parts = line.strip().split()
+                    if len(parts) < 5:
+                        continue
+                    class_id = int(parts[0])
+                    width = float(parts[3])
+                    height = float(parts[4])
+                    if width>=1 or height>=1:
+                        continue
+                    area_ratio = width*height
+                    
+                    class_area_ratios.append({
+                        "class_id": class_id,
+                        "width": width,
+                        "height": height,
+                        "area_ratio": area_ratio
+                    })
+
+    df = pd.DataFrame(class_area_ratios)
+
+    # print(df)
+
+    df = df[df['area_ratio'] < 0.01]
+
+    print(max(df['area_ratio']), min(df['area_ratio']))
+
+    plt.figure(figsize=(10, 6))
+    
+    # 使用Seaborn绘制面积分布
+    sns.histplot(data = df, x = 'area_ratio', kde=True, hue='class_id', palette='tab10', bins=30)
+    
+    # plt.title("Distribution of Target Sizes (Area Ratio) by Class")
+    # plt.xlabel("Area Ratio (Normalized)")
+    # plt.ylabel("Frequency")
+    # plt.legend(title="Class ID", loc="upper right")
+    # plt.tight_layout()
+    plt.show()
+
     
 
-    print(stats_info)
+
 
 if __name__ == "__main__":
     # image_number("F:\\nematoda\\nema")
@@ -214,4 +265,6 @@ if __name__ == "__main__":
     # count_object_from_voc_label_folder(path)
     # select_sample(path, "C:\\Users\\zhipeng\\Desktop\\DataSample")
 
-    statistic_object_size("F:\\pest_data\\Multitask_or_multimodality\\YOLO_25JUN24_ALL_INSECT\\labels\\train")
+    # statistic_object_size("F:\\pest_data\\Multitask_or_multimodality\\YOLO_25JUN24_ALL_INSECT\\labels\\train")
+
+    draw_object_size_distribution("F:\\pest_data\\Multitask_or_multimodality\\YOLO_18SEP24_ALL_INSECTA\\labels\\train")

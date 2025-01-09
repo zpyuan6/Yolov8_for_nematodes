@@ -39,12 +39,14 @@ def convert_voc_to_coco(voc_folder, coco_folder, version=1.0, split_ratio=0.9):
         for xml_file in xml_files:
             tree = ET.parse(join(voc_folder, xml_file))
             root = tree.getroot()
-            file_name = xml_file.split('.')[0] + '.JPG'
+            file_name = ".".join(xml_file.split('.')[0:-1])  + '.JPG'
             # if not isfile(join(voc_folder, file_name)):
             #     file_name = xml_file.split('.')[0] + '.JPG'
             if not isfile(join(voc_folder, file_name)):
-                print(f'File not found: {file_name}')
-                continue
+                file_name = ".".join(xml_file.split('.')[0:-1]) + '.jpg'
+                if not isfile(join(voc_folder, file_name)):
+                    print(f'File not found: {file_name}')
+                    continue
 
             shutil.copy2(os.path.join(voc_folder, file_name), os.path.join(image_folder, file_name))
 
@@ -279,6 +281,91 @@ def check_image_file_in_VOC_and_COCO(voc_folder, coco_folder):
             else:
                 print(f"Image not found in COCO: {image}")
 
+def select_coco_samples_based_yolo(coco_path, yolo_path):
+    yolo_image_list = [".".join(file.split(".")[0:-1]) for file in os.listdir(os.path.join(yolo_path, "images\\val"))]
+
+    coco_dict = json.loads(open(os.path.join(coco_path, "annotations\\val.json")).read())
+
+    coco_image_list = coco_dict['images']
+
+    selected_images = []
+
+    for image in coco_image_list:
+        f_name = ".".join(image['file_name'].split(".")[0:-1])
+        if f_name in yolo_image_list:
+            selected_images.append(image)
+        else:
+            print(f"Image not found: {image['file_name']}")
+
+    print(len(selected_images), len(yolo_image_list))
+
+    coco_dict['images'] = selected_images
+
+    b = json.dumps(coco_dict, indent=4)
+
+    f2 = open(os.path.join(coco_path, "annotations\\selectedVal.json"), 'w')
+    f2.write(b)
+    f2.close()
+
+def correct_coco_annotation_file(coco_folder, annotation_file):
+    with open(os.path.join(coco_folder, "annotations", annotation_file), 'r') as f:
+        data = json.load(f)
+
+    old_categories = data['categories']
+
+    new_categories = ["Meloidogyne", "Potato Cyst Nematode Cyst", "Globodera", "Pratylenchus", "Potato Cyst Nematode Juveniles 2", "Ditylenchus"]
+
+    new_categories = [
+        {
+            "id": 0,
+            "name": "Meloidogyne",
+            "supercategory": "none"
+        },
+        {
+            "id": 1,
+            "name": "Potato Cyst Nematode Cyst",
+            "supercategory": "none"
+        },
+        {
+            "id": 2,
+            "name": "Globodera",
+            "supercategory": "none"
+        },
+        {
+            "id": 3,
+            "name": "Pratylenchus",
+            "supercategory": "none"
+        },
+        {
+            "id": 4,
+            "name": "Potato Cyst Nematode Juveniles 2",
+            "supercategory": "none"
+        },
+        {
+            "id": 5,
+            "name": "Ditylenchus",
+            "supercategory": "none"
+        },
+    ]
+
+    # mapping = {
+    #     11:1, 10:2, 2:3, 9:4, 7:5, 4:2, 8:6
+    # }
+
+    old_annotations = data['annotations']
+
+    new_annotations = []
+
+    for annotation in old_annotations:
+        
+        annotation['category_id'] = int(annotation['category_id'])+1
+           
+
+    # data['categories'] = new_categories
+    
+    with open(os.path.join(coco_folder, "annotations", annotation_file), 'w') as f:
+        json.dump(data, f, indent=4)
+
 if __name__ == "__main__":
     # Example usage
     voc_folder = 'F:\\pest_data\\Multitask_or_multimodality\\annotated_data'
@@ -287,6 +374,13 @@ if __name__ == "__main__":
 
     # coco_folder = convert_voc_to_coco(voc_folder, "F:\\pest_data\\Multitask_or_multimodality")
 
+    # coco_folder = convert_voc_to_coco("F:\\nematoda\\AgriNema\\original_annotated_data", "F:\\nematoda\\AgriNema\\Formated_Dataset\\COCO_Dec24", split_ratio=1.0)
+
+    coco_folder = convert_voc_to_coco("F:\\pest_data\\Multitask_or_multimodality\\annotated_data", "X:\\pervasive_group\\PestProject\\COCO_07JAN25_ALL_INSECT", split_ratio=1.0)
+
+    select_coco_samples_based_yolo("X:\\pervasive_group\\PestProject\\COCO_07JAN25_ALL_INSECT", "X:\\pervasive_group\\PestProject\\YOLO_07JAN25_ALL_INSECT")
+
+    # correct_coco_annotation_file("F:\\nematoda\\AgriNema\\Formated_Dataset\\COCO_Dec24", "selectedVal-copy.json")
     """
     classes_name_list_for_all_insecta = [
         "INSECTA", # 'INSECTA': 834, 'FROGHOPPER (CERCOPIDAE)': 1, 'SCARABAEIDAE': 1
@@ -381,5 +475,5 @@ if __name__ == "__main__":
     # rename_categories_for_coco(coco_folder, 'valPEST.json', 'val_pest_only.json', rename_mapping_pest_only)
 
     # unified_image_format(coco_folder)
-    check_coco_folder("F:\\pest_data\\Multitask_or_multimodality\\coco_pest_2024_10_01")
+    # check_coco_folder("F:\\pest_data\\Multitask_or_multimodality\\coco_pest_2024_10_01")
     # check_image_file_in_VOC_and_COCO(voc_folder, "F:\\pest_data\\Multitask_or_multimodality\\coco_pest_2024_10_01")

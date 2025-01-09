@@ -30,7 +30,7 @@ def parse_args():
 
     # 添加参数
     parser.add_argument('--yaml_path', type=str, required=True, help='Path to dataset YAML file')
-    parser.add_argument('--models', nargs='+', required=True, help='List of models for training (e.g. yolov5s, yolov5m)')
+    parser.add_argument('--models', nargs='+', required=True, help='List of models for training (e.g. yolov5s.pt, yolov5m.pt)')
     parser.add_argument('--epochs', type=int, default=200, help='Number of training epochs')
     parser.add_argument('--img_size', type=int, default=640, help='Image size for training')
     parser.add_argument('--batch_size', type=int, default=16, help='Batch size for training')

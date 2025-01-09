@@ -38,7 +38,7 @@ def calculate_metrics(dataset_dir):
 
 def prediction_speed(model_path, dataset_dir):
 
-    test_image_dir = f"{dataset_dir}\\images\\test"
+    test_image_dir = f"{dataset_dir}"
 
     model = YOLO(model_path)
 
@@ -73,17 +73,17 @@ def evaluation_by_sourcecode(model_name, dataset_yaml_name):
     # print(metrics.box.ap50, np.mean(metrics.box.ap50))
 
 if __name__ == "__main__":
-    model_path = "runs\\detect\\uk_pest_24Dec_tiny\\weights\\best.pt"
+    model_path = "runs\\detect\\YOLOv8_640_18SEP24_all_insect_tiny\\weights\\best.pt"
     dataset_yaml_path = "uk_pest_dataset_25DEC.yaml"
     # model_path = "runs\\detect\\train\\weights\\last.pt"
-    # dataset_dir = "F:\\nematoda\\nemadote_detection"
+    dataset_dir = "F:\\pest_data\\Multitask_or_multimodality\\YOLO_18SEP24_ALL_INSECTA\\images\\val"
     # model_name = ["uk_pest_24Dec_tiny","uk_pest_24DEC_tiny2","uk_pest_24Dec_medium","uk_pest_24DEC_medium2","uk_pest_24Dec_extra","uk_pest_24DEC_extra2","uk_pest_25DEC_extra","uk_pest_25DEC_medium"]
     model_name = ["YOLOv8_640_18SEP24_all_insect_tiny","YOLOv8_640_18SEP24_all_insect_medium","YOLOv8_640_18SEP24_all_insect_extra"]
     dataset_yaml_name = ["uk_pest_dataset_18SEP24_all_insect_x1.25", "uk_pest_dataset_18SEP24_all_insect_x1.5", "uk_pest_dataset_18SEP24_all_insect_x1.75"]
 
-    for model in model_name:
-        for dataset in dataset_yaml_name:
-            evaluation_by_sourcecode(model, dataset)
+    # for model in model_name:
+    #     for dataset in dataset_yaml_name:
+    #         evaluation_by_sourcecode(model, dataset)
 
     # prediction(model_path, dataset_dir)
-    # prediction_speed(model_path, dataset_dir)
+    prediction_speed(model_path, dataset_dir)
